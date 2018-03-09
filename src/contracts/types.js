@@ -3,8 +3,10 @@ import Web3 from 'web3'
 export type NetworkParams = {
   id: number,
   web3: Web3,
-  account: string,
   web3WS: Web3 | undefined,
+  account: string,
+  txHashCallback: (hash: string) => void,
+  txEndCallback: (receipt: Object) => void,
 };
 
 export type SecurityToken = {

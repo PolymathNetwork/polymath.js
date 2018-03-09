@@ -30,7 +30,7 @@
   "scripts": {
     "start-lint": "esw -w --fix src",
     "lint": "eslint --fix src",
-    "precommit": "lint-staged && npm run build",
+    "precommit": "lint-staged",
     "build": "babel src --out-dir dist",
     "prepublish": "npm run build"
   },
