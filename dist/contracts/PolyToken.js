@@ -10,7 +10,7 @@ var _bignumber = require('bignumber.js');
 
 var _bignumber2 = _interopRequireDefault(_bignumber);
 
-var _PolyToken = require('../../tmp/PolyToken.json');
+var _PolyToken = require('../PolyToken.json');
 
 var _PolyToken2 = _interopRequireDefault(_PolyToken);
 

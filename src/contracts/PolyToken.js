@@ -1,6 +1,6 @@
 import BigNumber from 'bignumber.js'
 
-import artifact from '../../tmp/PolyToken.json' // TODO @bshevchenko: will be replaced with artifact from polymath-core_v2 npm package
+import artifact from '../PolyToken.json' // TODO @bshevchenko: will be replaced with artifact from polymath-core_v2 npm package
 import Contract from './Contract'
 
 class PolyToken extends Contract {
