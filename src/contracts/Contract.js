@@ -45,11 +45,15 @@ export default class Contract {
 
   /** @private */
   _init () {
-    const { address } = this._artifact.networks[Contract.params.id]
-    if (this._contract && this.address === address) {
-      return
+    try {
+      const { address } = this._artifact.networks[Contract.params.id]
+      if (this._contract && this.address === address) {
+        return
+      }
+      this.address = address
+    } catch (e) {
+      throw new Error('Contract is not deployed to the network ' + Contract.params.id)
     }
-    this.address = address
     this._contract = this._newContract()
     this._methods = this._contract.methods
   }
@@ -153,13 +157,17 @@ export default class Contract {
     }
   }
 
+  static unsubscribe (): boolean {
+    return Contract.params.web3WS.eth.clearSubscriptions()
+  }
+
   /**
    * @param v
    * @returns {string}
    * @protected
    */
   _toBytes (v: string): string {
-    return Contract._web3.utils.asciiToHex(v)
+    return Contract._web3.utils.asciiToHex(v).replace(/\u0000/g, '')
   }
 
   /**

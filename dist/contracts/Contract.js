@@ -67,12 +67,16 @@ var Contract = function () {
   }, {
     key: '_init',
     value: function _init() {
-      var address = this._artifact.networks[Contract.params.id].address;
+      try {
+        var address = this._artifact.networks[Contract.params.id].address;
 
-      if (this._contract && this.address === address) {
-        return;
+        if (this._contract && this.address === address) {
+          return;
+        }
+        this.address = address;
+      } catch (e) {
+        throw new Error('Contract is not deployed to the network ' + Contract.params.id);
       }
-      this.address = address;
       this._contract = this._newContract();
       this._methods = this._contract.methods;
     }
@@ -176,17 +180,17 @@ var Contract = function () {
         return false;
       }
     }
+  }, {
+    key: '_toBytes',
+
 
     /**
      * @param v
      * @returns {string}
      * @protected
      */
-
-  }, {
-    key: '_toBytes',
     value: function _toBytes(v) {
-      return Contract._web3.utils.asciiToHex(v);
+      return Contract._web3.utils.asciiToHex(v).replace(/\u0000/g, '');
     }
 
     /**
@@ -204,6 +208,11 @@ var Contract = function () {
     key: 'account',
     get: function get() {
       return Contract.params.account;
+    }
+  }], [{
+    key: 'unsubscribe',
+    value: function unsubscribe() {
+      return Contract.params.web3WS.eth.clearSubscriptions();
     }
   }]);
 
