@@ -5,6 +5,7 @@
     "transform-class-properties",
     "transform-react-jsx",
     "syntax-async-functions",
-    "transform-regenerator"
+    "transform-regenerator",
+    "transform-runtime"
   ]
 }
