@@ -12,13 +12,7 @@ export default class Contract {
     this._artifact = _artifact
     return new Proxy(this, {
       get: (target: Contract, field: string) => {
-        try {
-          target._init()
-        } catch (e) {
-          // eslint-disable-next-line
-          console.error('Contract init failed', e)
-          return undefined
-        }
+        target._init()
         if (field in target) {
           return target[field]
         }
@@ -158,7 +152,12 @@ export default class Contract {
   }
 
   static unsubscribe (): boolean {
-    return Contract.params.web3WS.eth.clearSubscriptions()
+    try {
+      Contract.params.web3WS.eth.clearSubscriptions()
+    } catch (e) {
+      // TODO @bshevchenko: clearSubscriptions throws error when no subscriptions and probably subscriptions are not tracked at all
+    }
+    return true
   }
 
   /**
