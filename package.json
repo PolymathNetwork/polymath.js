@@ -1,6 +1,6 @@
 {
   "name": "polymath.js_v2",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-eslint": "7.2.3",
@@ -23,12 +23,12 @@
   "dependencies": {
     "axios": "0.16.2",
     "bignumber.js": "5.0.0",
+    "polymath-core_v2": "0.1.5",
     "redux": "3.7.2",
     "redux-thunk": "2.2.0",
     "web3": "1.0.0-beta.30",
-    "web3-eth-contract": "1.0.0-beta.30",
     "web3-core-method": "bshevchenko/web3-core-method#master",
-    "polymath-core": "PolymathNetwork/polymath-core#master"
+    "web3-eth-contract": "1.0.0-beta.30"
   },
   "main": "./dist/index.js",
   "scripts": {

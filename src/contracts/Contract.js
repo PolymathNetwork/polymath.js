@@ -1,18 +1,21 @@
 import Web3Contract from 'web3-eth-contract'
+import axios from 'axios'
+
 import type { NetworkParams } from './types'
 
 export default class Contract {
-  static params: NetworkParams = null;
-  _artifact: Object = null;
-  _contract: Web3Contract = null;
-  _methods: Object = null;
-  address: string = null;
+  static params: NetworkParams = null
+  _artifact: Object = null
+  _contract: Web3Contract = null
+  _methods: Object = null
+  _api = axios.create({ baseURL: 'https://polymath-api-staging.herokuapp.com' })
+  address: string = null
 
-  constructor (_artifact) {
-    this._artifact = _artifact
+  constructor (artifact: Object, at: ?string) {
+    this._artifact = artifact
     return new Proxy(this, {
       get: (target: Contract, field: string) => {
-        target._init()
+        target._init(at)
         if (field in target) {
           return target[field]
         }
@@ -38,9 +41,9 @@ export default class Contract {
   }
 
   /** @private */
-  _init () {
+  _init (at: string) {
     try {
-      const { address } = this._artifact.networks[Contract.params.id]
+      const address = at || this._artifact.networks[Contract.params.id].address
       if (this._contract && this.address === address) {
         return
       }
@@ -91,10 +94,10 @@ export default class Contract {
 
   /**
    * @param method
-   * @returns {Promise.<Object>}
+   * @returns {Promise.<Object>} transaction receipt
    * @protected
    */
-  async _tx (method): Object {
+  async _tx (method): Promise<Object> {
     const params = { from: this.account }
     params.gas = await method.estimateGas(params)
 
@@ -127,7 +130,7 @@ export default class Contract {
     eventName: string,
     filter: Object,
     callback: (event: ?Object) => void,
-  ): boolean {
+  ): Promise<boolean> {
     try {
       await this._newContract(true).events[eventName](
         { filter },
@@ -161,12 +164,52 @@ export default class Contract {
   }
 
   /**
+   * TODO @bshevchenko: user should be authorized to put data
+   * @param address
+   * @param data
+   * @returns {Promise.<void>}
+   * @protected
+   */
+  async _apiPut (address: string, data: Object) {
+    return this._api.post('/offchain', { address, data })
+  }
+
+  /**
+   *
+   * @param address of contract
+   * @returns {Promise.<?Object>}
+   * @protected
+   */
+  async _apiGet (address: string): Promise<?Object> {
+    try {
+      const response = await this._api.get('/offchain/' + address)
+      if (response.data.error === true) {
+        return null
+      }
+      return response.data
+    } catch (e) {
+      // eslint-disable-next-line
+      console.error('_apiGet', address, e)
+      return null
+    }
+  }
+
+  /**
    * @param v
    * @returns {string}
    * @protected
    */
   _toBytes (v: string): string {
-    return Contract._web3.utils.asciiToHex(v).replace(/\u0000/g, '')
+    return Contract._web3.utils.asciiToHex(v)
+  }
+
+  /**
+   * @param v
+   * @returns {string}
+   * @protected
+   */
+  _toAscii (v: string): string {
+    return Contract._web3.utils.hexToAscii(v).replace(/\u0000/g, '')
   }
 
   /**

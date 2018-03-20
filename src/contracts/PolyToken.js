@@ -1,7 +1,9 @@
+import artifact from 'polymath-core_v2/build/contracts/PolyTokenFaucet.json'
 import BigNumber from 'bignumber.js'
 
-import artifact from '../../PolyToken.json' // TODO @bshevchenko: will be replaced with artifact from polymath-core_v2 npm package
 import Contract from './Contract'
+
+const TRANSFER = 'Transfer'
 
 class PolyToken extends Contract {
   decimals: number = 18;
@@ -29,11 +31,46 @@ class PolyToken extends Contract {
   }
 
   async getTokens (amount: BigNumber) {
-    await this._tx(this._methods.getTokens(this.addDecimals(amount)))
+    return this._tx(this._methods.getTokens(this.addDecimals(amount)))
+  }
+
+  async transfer (to: string, amount: BigNumber) {
+    return this._tx(this._methods.transfer(to, this.addDecimals(amount)))
+  }
+
+  async transferFrom (from: string, to: string, amount: BigNumber) {
+    return this._tx(this._methods.transferFrom(from, to, this.addDecimals(amount)))
   }
 
   async approve (spender: string, amount: BigNumber) {
-    await this._tx(this._methods.approve(spender, this.addDecimals(amount)))
+    return this._tx(this._methods.approve(spender, this.addDecimals(amount)))
+  }
+
+  async increaseApproval (spender: string, amount: BigNumber) {
+    return this._tx(this._methods.increaseApproval(spender, this.addDecimals(amount)))
+  }
+
+  async decreaseApproval (spender: string, amount: BigNumber) {
+    return this._tx(this._methods.decreaseApproval(spender, this.addDecimals(amount)))
+  }
+
+  async subscribeMyTransfers (
+    fromCallback: (from: string, value: BigNumber) => void,
+    toCallback: (to: string, value: BigNumber) => void,
+  ) {
+    const callback = (event) => {
+      const values = event.returnValues
+      const value = new BigNumber(values.value)
+      if (values.from === this.account) {
+        fromCallback(values.from, value)
+      } else {
+        toCallback(values.to, value)
+      }
+    }
+    return Promise.all([
+      this.subscribe(TRANSFER, { from: this.account }, callback),
+      this.subscribe(TRANSFER, { to: this.account }, callback)
+    ])
   }
 }
 

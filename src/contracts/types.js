@@ -1,5 +1,7 @@
 import Web3 from 'web3'
 
+import SecurityTokenContract from './SecurityToken'
+
 export type NetworkParams = {
   id: number,
   web3: Web3,
@@ -7,18 +9,32 @@ export type NetworkParams = {
   account: string,
   txHashCallback: (hash: string) => void,
   txEndCallback: (receipt: Object) => void,
-};
+}
+
+export type SymbolDetails = {
+  owner: string,
+  timestamp: Date,
+  contact: string,
+  status: boolean,
+}
 
 export type SecurityToken = {
+  ticker: string,
+  owner: string,
+  contact: string,
   address: string,
   name: string,
-  ticker: string,
-  totalSupply: number,
   decimals: number,
-  owner: string,
+  details: string,
+  contract: SecurityTokenContract,
+
+  // off-chain
   url: string,
   firstName: string,
   lastName: string,
-  contact: string,
   desc: string,
-};
+
+  // flags
+  isGenerated: boolean,
+  isComplete: boolean,
+}

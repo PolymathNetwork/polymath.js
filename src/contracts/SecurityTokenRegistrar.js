@@ -1,15 +1,17 @@
+import artifact from 'polymath-core_v2/build/contracts/SecurityTokenRegistrar.json'
 import BigNumber from 'bignumber.js'
 
-import artifact from 'polymath-core/build/contracts/SecurityTokenRegistrar.json'  // TODO @bshevchenko: will be replaced with artifact from polymath-core_v2 npm package
 import Contract from './Contract'
 import PolyToken from './PolyToken'
-import { SecurityToken } from './types'
+import TickerRegistrar from './TickerRegistrar'
+import SecurityTokenContract from './SecurityToken'
+
+import type { SecurityToken } from './types'
 
 class SecurityTokenRegistrar extends Contract {
-  fee: number = new BigNumber(100000);
-  namespace: string = 'polymath';
+  fee = new BigNumber(100) // TODO @bshevchenko: temporarily hardcoded
 
-  async isPreAuth (): boolean {
+  async isPreAuth (): Promise<boolean> {
     try {
       const allowance = await PolyToken.allowance(this.account, this.address)
       const currBalance = await PolyToken.myBalance()
@@ -21,23 +23,61 @@ class SecurityTokenRegistrar extends Contract {
     }
   }
 
-  async preAuth () {
-    await PolyToken.approve(this.address, this.fee)
+  async getTokenByTicker (ticker: string): Promise<?SecurityToken> {
+    const details = await TickerRegistrar.getDetails(ticker)
+    if (!details) {
+      return null
+    }
+    let token: SecurityToken = {
+      ticker,
+      owner: details.owner,
+      contact: details.contact,
+      isGenerated: false,
+      isComplete: false,
+    }
+    if (details.status) {
+      token.isGenerated = true
+      token.address = await this.getSecurityTokenAddress(ticker)
+      token.contract = new SecurityTokenContract(token.address)
+      const [name, decimals, details] = await Promise.all([
+        token.contract.name(),
+        token.contract.decimals(),
+        token.contract.tokenDetails(),
+      ])
+      token.name = name
+      token.decimals = decimals
+      token.details = this._toAscii(details)
+
+      const offchain = await this._apiGet(token.address)
+      if (offchain !== null) {
+        token = {
+          ...token,
+          ...offchain,
+          isComplete: true
+        }
+      }
+    }
+    return token
   }
 
-  async createSecurityToken (token: SecurityToken) {
-    await this._tx(
-      this._methods.createSecurityToken(
-        this.namespace,
-        token.name,
-        token.ticker,
-        new BigNumber(10).toPower(token.decimals).times(token.totalSupply),
-        token.decimals,
-        token.owner,
-        8,
-      ),
-    )
-    // TODO @bshevchenko: update API
+  async preAuth () {
+    return await PolyToken.approve(this.address, this.fee)
+  }
+
+  async generateSecurityToken (token: SecurityToken) {
+    let address = await this.getSecurityTokenAddress(token.ticker)
+    if (this._isEmptyAddress(address)) {
+      const receipt = await this._tx(
+        this._methods.generateSecurityToken(token.name, token.ticker, token.decimals, this._toBytes(token.details))
+      )
+      address = receipt.events.LogNewSecurityToken.returnValues._securityTokenAddress
+    } else {
+      if (await this._apiGet(address) !== null) {
+        throw new Error('Token is already generated and supplied with off-chain data')
+      }
+    }
+    await this._apiPut(address, token)
+    // TODO @bshevchenko: send email
   }
 }
 
