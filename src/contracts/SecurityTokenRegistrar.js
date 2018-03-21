@@ -6,7 +6,7 @@ import PolyToken from './PolyToken'
 import TickerRegistrar from './TickerRegistrar'
 import SecurityTokenContract from './SecurityToken'
 
-import type { SecurityToken } from './types'
+import type { SecurityToken, SymbolDetails } from './types'
 
 class SecurityTokenRegistrar extends Contract {
   fee = new BigNumber(100) // TODO @bshevchenko: temporarily hardcoded
@@ -23,8 +23,13 @@ class SecurityTokenRegistrar extends Contract {
     }
   }
 
-  async getTokenByTicker (ticker: string): Promise<?SecurityToken> {
-    const details = await TickerRegistrar.getDetails(ticker)
+  async getMyToken (): Promise<?SecurityToken> {
+    const details = await TickerRegistrar.getDetailsByOwner(this.account)
+    return this.getTokenByTicker(details.ticker, details)
+  }
+
+  async getTokenByTicker (ticker: string, details: ?SymbolDetails): Promise<?SecurityToken> {
+    details = details || await TickerRegistrar.getDetails(ticker)
     if (!details) {
       return null
     }

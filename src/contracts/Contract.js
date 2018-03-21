@@ -1,4 +1,5 @@
 import Web3Contract from 'web3-eth-contract'
+import BigNumber from 'bignumber.js'
 import axios from 'axios'
 
 import type { NetworkParams } from './types'
@@ -7,6 +8,7 @@ export default class Contract {
   static params: NetworkParams = null
   _artifact: Object = null
   _contract: Web3Contract = null
+  _contractWS: Web3Contract = null
   _methods: Object = null
   _api = axios.create({ baseURL: 'https://polymath-api-staging.herokuapp.com' })
   address: string = null
@@ -52,6 +54,7 @@ export default class Contract {
       throw new Error('Contract is not deployed to the network ' + Contract.params.id)
     }
     this._contract = this._newContract()
+    this._contractWS = Contract.params.web3WS === Contract.params.web3 ? this._contract : this._newContract(true)
     this._methods = this._contract.methods
   }
 
@@ -132,7 +135,7 @@ export default class Contract {
     callback: (event: ?Object) => void,
   ): Promise<boolean> {
     try {
-      await this._newContract(true).events[eventName](
+      await this._contractWS.events[eventName](
         { filter },
         (error, event) => {
           if (error) {
@@ -167,15 +170,20 @@ export default class Contract {
    * TODO @bshevchenko: user should be authorized to put data
    * @param address
    * @param data
-   * @returns {Promise.<void>}
+   * @returns {Promise}
    * @protected
    */
   async _apiPut (address: string, data: Object) {
-    return this._api.post('/offchain', { address, data })
+    try {
+      return await this._api.post('/offchain', {address, data})
+    } catch (e) {
+      // eslint-disable-next-line
+      console.error('_apiPut', address, data, e)
+      return null
+    }
   }
 
   /**
-   *
    * @param address of contract
    * @returns {Promise.<?Object>}
    * @protected
@@ -210,6 +218,44 @@ export default class Contract {
    */
   _toAscii (v: string): string {
     return Contract._web3.utils.hexToAscii(v).replace(/\u0000/g, '')
+  }
+
+  /**
+   * @param v
+   * @returns {number}
+   * @protected
+   */
+  _toUnixTS (v: Date): number {
+    return Math.floor(v.getTime() / 1000)
+  }
+
+  /**
+   * @param v
+   * @returns {Date}
+   * @protected
+   */
+  _toDate (v: number): Date {
+    return new Date(v * 1000)
+  }
+
+  /**
+   * @param v
+   * @param unit
+   * @returns {BigNumber}
+   * @protected
+   */
+  _fromWei (v: BigNumber, unit: string = 'ether'): BigNumber {
+    return new BigNumber(Contract._web3.utils.fromWei(v, unit))
+  }
+
+  /**
+   * @param v
+   * @param unit
+   * @returns {BigNumber}
+   * @protected
+   */
+  _toWei (v: BigNumber, unit: string = 'ether'): BigNumber {
+    return new BigNumber(Contract._web3.utils.toWei(v, unit))
   }
 
   /**

@@ -1,4 +1,5 @@
 import Web3 from 'web3'
+import BigNumber from 'bignumber.js'
 
 import SecurityTokenContract from './SecurityToken'
 
@@ -12,6 +13,7 @@ export type NetworkParams = {
 }
 
 export type SymbolDetails = {
+  ticker: string,
   owner: string,
   timestamp: Date,
   contact: string,
@@ -37,4 +39,24 @@ export type SecurityToken = {
   // flags
   isGenerated: boolean,
   isComplete: boolean,
+}
+
+export type STODetails = {
+  start: Date,
+  end: Date,
+  cap: BigNumber,
+  raised: BigNumber,
+}
+
+export type STOPurchase = {
+  investor: string,
+  txHash: string,
+  amount: BigNumber,
+  paid: BigNumber,
+}
+
+export type Investor = {
+  address: string,
+  from: Date,
+  to: Date,
 }
