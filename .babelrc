@@ -1,5 +1,13 @@
 {
-  "presets": ["es2015", "flow", "stage-0"],
+  "presets": [
+    "flow",
+    "stage-0",
+    ["env", {
+      "targets": {
+        "browsers": ["last 2 versions"]
+      }
+    }]
+  ],
   "plugins": [
     "transform-object-rest-spread",
     "transform-class-properties",

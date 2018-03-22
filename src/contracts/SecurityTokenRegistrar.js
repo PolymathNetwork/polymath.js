@@ -6,7 +6,7 @@ import PolyToken from './PolyToken'
 import TickerRegistrar from './TickerRegistrar'
 import SecurityTokenContract from './SecurityToken'
 
-import type { SecurityToken, SymbolDetails } from './types'
+import type { SecurityToken, SymbolDetails } from '../../types'
 
 class SecurityTokenRegistrar extends Contract {
   fee = new BigNumber(100) // TODO @bshevchenko: temporarily hardcoded
@@ -25,6 +25,9 @@ class SecurityTokenRegistrar extends Contract {
 
   async getMyToken (): Promise<?SecurityToken> {
     const details = await TickerRegistrar.getDetailsByOwner(this.account)
+    if (!details) {
+      return null
+    }
     return this.getTokenByTicker(details.ticker, details)
   }
 
@@ -71,8 +74,9 @@ class SecurityTokenRegistrar extends Contract {
 
   async generateSecurityToken (token: SecurityToken) {
     let address = await this.getSecurityTokenAddress(token.ticker)
+    let receipt
     if (this._isEmptyAddress(address)) {
-      const receipt = await this._tx(
+      receipt = await this._tx(
         this._methods.generateSecurityToken(token.name, token.ticker, token.decimals, this._toBytes(token.details))
       )
       address = receipt.events.LogNewSecurityToken.returnValues._securityTokenAddress
@@ -82,7 +86,10 @@ class SecurityTokenRegistrar extends Contract {
       }
     }
     await this._apiPut(address, token)
+
     // TODO @bshevchenko: send email
+
+    return receipt
   }
 }
 

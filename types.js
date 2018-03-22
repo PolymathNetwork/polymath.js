@@ -1,7 +1,7 @@
 import Web3 from 'web3'
 import BigNumber from 'bignumber.js'
 
-import SecurityTokenContract from './SecurityToken'
+import SecurityTokenContract from './src/contracts/SecurityToken'
 
 export type NetworkParams = {
   id: number,

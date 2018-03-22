@@ -19,8 +19,7 @@ export default class SecurityToken extends Contract {
 
   async decimals (): Promise<number> {
     if (!this._decimals) {
-      const decimals = await this._methods.decimals().call()
-      this._decimals = decimals.toNumber()
+      this._decimals = await this._methods.decimals().call()
     }
     return this._decimals
   }
@@ -51,7 +50,7 @@ export default class SecurityToken extends Contract {
   }
 
   async setSTO (factory: string, start: Date, end: Date, cap: BigNumber, rate: BigNumber) {
-    const data = Contract._web3.eth.abi.encodeFunctionCall({
+    const data = Contract.params.web3.eth.abi.encodeFunctionCall({
       name: 'configure',
       type: 'function',
       inputs: [{

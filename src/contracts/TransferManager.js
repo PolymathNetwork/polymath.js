@@ -1,7 +1,7 @@
 import artifact from 'polymath-core_v2/build/contracts/GeneralTransferManager.json' // TODO @bshevchenko: interfaces/ITransferManager
 
 import Contract from './Contract'
-import type { Investor } from './types'
+import type { Investor } from '../../types'
 
 const LOG_MODIFY_WHITELIST = 'LogModifyWhitelist'
 

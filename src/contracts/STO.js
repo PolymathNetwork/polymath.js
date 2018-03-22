@@ -2,7 +2,7 @@ import artifact from 'polymath-core_v2/build/contracts/CappedSTO.json' // TODO @
 
 import Contract from './Contract'
 import SecurityToken from './SecurityToken'
-import type { STODetails, STOPurchase } from './types'
+import type { STODetails, STOPurchase } from '../../types'
 
 const LOG_TOKEN_PURCHASE = 'TokenPurchase'
 

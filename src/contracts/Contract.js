@@ -2,7 +2,7 @@ import Web3Contract from 'web3-eth-contract'
 import BigNumber from 'bignumber.js'
 import axios from 'axios'
 
-import type { NetworkParams } from './types'
+import type { NetworkParams } from '../../types'
 
 export default class Contract {
   static params: NetworkParams = null
@@ -22,6 +22,9 @@ export default class Contract {
           return target[field]
         }
         const method = target._contract.methods[field]
+        if (!method) {
+          return method
+        }
         if (this._isView(field)) {
           return (...args) => method(...args).call()
         }
@@ -71,7 +74,7 @@ export default class Contract {
         return method.stateMutability === 'view'
       }
     }
-    throw new Error(`_isView: no method with "${name}" found`)
+    return false
   }
 
   /**
@@ -92,7 +95,7 @@ export default class Contract {
         )
       }
     }
-    throw new Error(`_isBoolOutput: no method with "${name}" found`)
+    throw new Error(`_isBoolOutput: no method with name "${name}" found`)
   }
 
   /**
@@ -178,7 +181,7 @@ export default class Contract {
       return await this._api.post('/offchain', {address, data})
     } catch (e) {
       // eslint-disable-next-line
-      console.error('_apiPut', address, data, e)
+      console.warn('_apiPut', address, data, e)
       return null
     }
   }
@@ -197,7 +200,7 @@ export default class Contract {
       return response.data
     } catch (e) {
       // eslint-disable-next-line
-      console.error('_apiGet', address, e)
+      console.warn('_apiGet', address, e)
       return null
     }
   }
@@ -208,7 +211,7 @@ export default class Contract {
    * @protected
    */
   _toBytes (v: string): string {
-    return Contract._web3.utils.asciiToHex(v)
+    return Contract.params.web3.utils.asciiToHex(v)
   }
 
   /**
@@ -217,7 +220,7 @@ export default class Contract {
    * @protected
    */
   _toAscii (v: string): string {
-    return Contract._web3.utils.hexToAscii(v).replace(/\u0000/g, '')
+    return Contract.params.web3.utils.hexToAscii(v).replace(/\u0000/g, '')
   }
 
   /**
@@ -245,7 +248,7 @@ export default class Contract {
    * @protected
    */
   _fromWei (v: BigNumber, unit: string = 'ether'): BigNumber {
-    return new BigNumber(Contract._web3.utils.fromWei(v, unit))
+    return new BigNumber(Contract.params.web3.utils.fromWei(v, unit))
   }
 
   /**
@@ -255,7 +258,7 @@ export default class Contract {
    * @protected
    */
   _toWei (v: BigNumber, unit: string = 'ether'): BigNumber {
-    return new BigNumber(Contract._web3.utils.toWei(v, unit))
+    return new BigNumber(Contract.params.web3.utils.toWei(v, unit))
   }
 
   /**

@@ -31,7 +31,7 @@ class PolyToken extends Contract {
   }
 
   async getTokens (amount: BigNumber) {
-    return this._tx(this._methods.getTokens(this.addDecimals(amount)))
+    return this._tx(this._methods.getTokens(this.addDecimals(amount), this.account))
   }
 
   async transfer (to: string, amount: BigNumber) {
