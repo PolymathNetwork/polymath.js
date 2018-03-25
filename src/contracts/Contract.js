@@ -1,22 +1,23 @@
-import Web3Contract from 'web3-eth-contract'
+// @flow
+
 import BigNumber from 'bignumber.js'
 import axios from 'axios'
 
-import type { NetworkParams } from '../../types'
+import type { NetworkParams, Artifact, Web3Contract, Web3Event } from '../../types'
 
 export default class Contract {
-  static params: NetworkParams = null
-  _artifact: Object = null
-  _contract: Web3Contract = null
-  _contractWS: Web3Contract = null
-  _methods: Object = null
+  static params: NetworkParams
+  _artifact: Artifact
+  _contract: Web3Contract
+  _contractWS: Web3Contract
+  _methods: Object
   _api = axios.create({ baseURL: 'https://polymath-api-staging.herokuapp.com' })
-  address: string = null
+  address: string
 
-  constructor (artifact: Object, at: ?string) {
+  constructor (artifact: Artifact, at?: string) {
     this._artifact = artifact
     return new Proxy(this, {
-      get: (target: Contract, field: string) => {
+      get: (target: Object, field: string) => {
         target._init(at)
         if (field in target) {
           return target[field]
@@ -46,7 +47,7 @@ export default class Contract {
   }
 
   /** @private */
-  _init (at: string) {
+  _init (at?: string) {
     try {
       const address = at || this._artifact.networks[Contract.params.id].address
       if (this._contract && this.address === address) {
@@ -103,16 +104,19 @@ export default class Contract {
    * @returns {Promise.<Object>} transaction receipt
    * @protected
    */
-  async _tx (method): Promise<Object> {
-    const params = { from: this.account }
-    params.gas = await method.estimateGas(params)
+  async _tx (method: Object): Promise<Object> {
+    const from = { from: this.account }
+    const params = {
+      ...from,
+      gas: await method.estimateGas(from)
+    }
 
     // dry run
     try {
       const okCode = this._isBoolOutput(method._method.name)
       const dryResult = await method.call(params)
       if (okCode && dryResult !== okCode) {
-        throw new Error(`Expected ${okCode}, but received ${dryResult}`)
+        throw new Error(`Expected ${okCode === true ? 'true' : okCode}, but received ${dryResult}`)
       }
     } catch (e) {
       throw new Error(`Transaction dry run failed: ${e.message}`)
@@ -135,7 +139,7 @@ export default class Contract {
   async subscribe (
     eventName: string,
     filter: Object,
-    callback: (event: ?Object) => void,
+    callback: (event: Web3Event) => void,
   ): Promise<boolean> {
     try {
       await this._contractWS.events[eventName](
@@ -144,7 +148,6 @@ export default class Contract {
           if (error) {
             // eslint-disable-next-line
             console.error(`Event "${eventName}" subscription error`, error)
-            callback()
             return
           }
           // eslint-disable-next-line

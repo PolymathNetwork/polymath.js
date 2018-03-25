@@ -1,3 +1,5 @@
+// @flow
+
 import artifact from 'polymath-core_v2/build/contracts/SecurityToken.json'
 import BigNumber from 'bignumber.js'
 
@@ -11,6 +13,9 @@ const STO_TYPE = 2
 const LOG_MODULE_ADDED = 'LogModuleAdded'
 
 export default class SecurityToken extends Contract {
+  name: Function
+  tokenDetails: Function
+
   _decimals: number
 
   constructor (at: string) {
@@ -24,13 +29,13 @@ export default class SecurityToken extends Contract {
     return this._decimals
   }
 
-  async addDecimals (n): Promise<BigNumber> {
+  async addDecimals (n: number | BigNumber): Promise<BigNumber> {
     return new BigNumber(10).toPower(
       await this.decimals()
     ).times(n)
   }
 
-  async removeDecimals (n): Promise<BigNumber> {
+  async removeDecimals (n: number | BigNumber): Promise<BigNumber> {
     return new BigNumber(n).div(new BigNumber(10).toPower(
       await this.decimals()
     ))

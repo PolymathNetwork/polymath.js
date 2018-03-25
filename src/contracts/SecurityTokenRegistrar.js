@@ -1,3 +1,5 @@
+// @flow
+
 import artifact from 'polymath-core_v2/build/contracts/SecurityTokenRegistrar.json'
 import BigNumber from 'bignumber.js'
 
@@ -9,6 +11,9 @@ import SecurityTokenContract from './SecurityToken'
 import type { SecurityToken, SymbolDetails } from '../../types'
 
 class SecurityTokenRegistrar extends Contract {
+  getSecurityTokenAddress: Function
+  tokenDetails: Function
+
   fee = new BigNumber(100) // TODO @bshevchenko: temporarily hardcoded
 
   async isPreAuth (): Promise<boolean> {
@@ -31,7 +36,7 @@ class SecurityTokenRegistrar extends Contract {
     return this.getTokenByTicker(details.ticker, details)
   }
 
-  async getTokenByTicker (ticker: string, details: ?SymbolDetails): Promise<?SecurityToken> {
+  async getTokenByTicker (ticker: string, details?: SymbolDetails): Promise<?SecurityToken> {
     details = details || await TickerRegistrar.getDetails(ticker)
     if (!details) {
       return null
@@ -46,17 +51,18 @@ class SecurityTokenRegistrar extends Contract {
     if (details.status) {
       token.isGenerated = true
       token.address = await this.getSecurityTokenAddress(ticker)
-      token.contract = new SecurityTokenContract(token.address)
+      const contract = new SecurityTokenContract(token.address)
+      token.contract = contract
       const [name, decimals, details] = await Promise.all([
-        token.contract.name(),
-        token.contract.decimals(),
-        token.contract.tokenDetails(),
+        contract.name(),
+        contract.decimals(),
+        contract.tokenDetails(),
       ])
       token.name = name
       token.decimals = decimals
       token.details = this._toAscii(details)
 
-      const offchain = await this._apiGet(token.address)
+      const offchain = token.address ? await this._apiGet(token.address) : null
       if (offchain !== null) {
         token = {
           ...token,
@@ -77,11 +83,16 @@ class SecurityTokenRegistrar extends Contract {
     let receipt
     if (this._isEmptyAddress(address)) {
       receipt = await this._tx(
-        this._methods.generateSecurityToken(token.name, token.ticker, token.decimals, this._toBytes(token.details))
+        this._methods.generateSecurityToken(
+          token.name,
+          token.ticker,
+          token.decimals,
+          this._toBytes(token.details || '')
+        )
       )
       address = receipt.events.LogNewSecurityToken.returnValues._securityTokenAddress
     } else {
-      if (await this._apiGet(address) !== null) {
+      if (!address || await this._apiGet(address) !== null) {
         throw new Error('Token is already generated and supplied with off-chain data')
       }
     }

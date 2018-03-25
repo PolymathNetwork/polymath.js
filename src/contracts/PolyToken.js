@@ -1,7 +1,10 @@
+// @flow
+
 import artifact from 'polymath-core_v2/build/contracts/PolyTokenFaucet.json'
 import BigNumber from 'bignumber.js'
 
 import Contract from './Contract'
+import type { Web3Event } from '../../types'
 
 const TRANSFER = 'Transfer'
 
@@ -58,7 +61,7 @@ class PolyToken extends Contract {
     fromCallback: (from: string, value: BigNumber) => void,
     toCallback: (to: string, value: BigNumber) => void,
   ) {
-    const callback = (event) => {
+    const callback = (event: Web3Event) => {
       const values = event.returnValues
       const value = new BigNumber(values.value)
       if (values.from === this.account) {

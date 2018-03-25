@@ -1,15 +1,46 @@
-import Web3 from 'web3'
+// @flow
+
 import BigNumber from 'bignumber.js'
 
 import SecurityTokenContract from './src/contracts/SecurityToken'
 
+export type Web3 = {
+  eth: {
+    clearSubscriptions: Function,
+    abi: {
+      encodeFunctionCall: Function
+    },
+    Contract: Function
+  },
+  utils: {
+    toWei: Function,
+    fromWei: Function,
+    asciiToHex: Function,
+    hexToAscii: Function
+  }
+}
+
 export type NetworkParams = {
   id: number,
   web3: Web3,
-  web3WS: Web3 | undefined,
+  web3WS: Web3,
   account: string,
   txHashCallback: (hash: string) => void,
   txEndCallback: (receipt: Object) => void,
+}
+
+export type Artifact = {
+  abi: Object,
+  networks: Object,
+}
+
+export type Web3Contract = {
+  events: Object,
+  getPastEvents: Function,
+}
+
+export type Web3Event = {
+  returnValues: Object,
 }
 
 export type SymbolDetails = {
@@ -24,17 +55,17 @@ export type SecurityToken = {
   ticker: string,
   owner: string,
   contact: string,
-  address: string,
-  name: string,
-  decimals: number,
-  details: string,
-  contract: SecurityTokenContract,
+  address?: string,
+  name?: string,
+  decimals?: number,
+  details?: string,
+  contract?: SecurityTokenContract,
 
   // off-chain
-  url: string,
-  firstName: string,
-  lastName: string,
-  desc: string,
+  url?: string,
+  firstName?: string,
+  lastName?: string,
+  desc?: string,
 
   // flags
   isGenerated: boolean,

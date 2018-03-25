@@ -1,3 +1,5 @@
+// @flow
+
 import artifact from 'polymath-core_v2/build/contracts/CappedSTO.json' // TODO @bshevchenko: interfaces/ISTO
 
 import Contract from './Contract'
@@ -7,6 +9,11 @@ import type { STODetails, STOPurchase } from '../../types'
 const LOG_TOKEN_PURCHASE = 'TokenPurchase'
 
 export default class STO extends Contract {
+  startTime: Function
+  endTime: Function
+  cap: Function
+  weiRaised: Function
+
   token: SecurityToken
 
   constructor (at: string, _token: SecurityToken) {

@@ -1,3 +1,5 @@
+// @flow
+
 import artifact from 'polymath-core_v2/build/contracts/TickerRegistrar.json'
 
 import Contract from './Contract'

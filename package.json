@@ -18,7 +18,8 @@
     "eslint-plugin-polymath": "github:PolymathNetwork/eslint-plugin-polymath",
     "husky": "0.14.3",
     "lint-staged": "5.0.0",
-    "npm-run-all": "4.0.2"
+    "npm-run-all": "4.0.2",
+    "flow-bin": "^0.68.0"
   },
   "dependencies": {
     "axios": "0.16.2",
@@ -34,8 +35,9 @@
   "scripts": {
     "start-lint": "esw -w --fix src",
     "lint": "eslint --fix src",
-    "precommit": "lint-staged",
-    "contracts": "cd node_modules/polymath-core_v2 && npm install && node node_modules/truffle/build/cli.bundled.js migrate --reset --all --network development",
+    "typecheck": "flow",
+    "precommit": "lint-staged && npm run typecheck",
+    "contracts": "cd node_modules/polymath-core_v2 && yarn && node node_modules/truffle/build/cli.bundled.js migrate --reset --all --network development",
     "build": "babel src --out-dir dist",
     "prepublish": "npm run build"
   },
@@ -44,5 +46,6 @@
       "eslint --fix",
       "git add"
     ]
-  }
+  },
+  "license": "UNLICENSED"
 }
