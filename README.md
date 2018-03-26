@@ -3,7 +3,7 @@
 TODO Update
 
 ```
-await SecurityTokenRegistrar.createSecurityToken(token)
+await SecurityTokenRegistry.createSecurityToken(token)
 ```
 This is all you need to create new security token using Polymath.js v2.0. It will:
 1. Format data into the blockchain types (e.g. add decimals for token values).

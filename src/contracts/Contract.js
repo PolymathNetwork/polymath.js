@@ -3,21 +3,22 @@
 import BigNumber from 'bignumber.js'
 import axios from 'axios'
 
-import type { NetworkParams, Artifact, Web3Contract, Web3Event } from '../../types'
+import type { NetworkParams, Artifact, Web3Contract, Web3Event, Address, Web3Receipt } from '../../types'
 
 export default class Contract {
+
   static params: NetworkParams
   _artifact: Artifact
   _contract: Web3Contract
   _contractWS: Web3Contract
   _methods: Object
   _api = axios.create({ baseURL: 'https://polymath-api-staging.herokuapp.com' })
-  address: string
+  address: Address
 
-  constructor (artifact: Artifact, at?: string) {
+  constructor (artifact: Artifact, at?: Address) {
     this._artifact = artifact
     return new Proxy(this, {
-      get: (target: Object, field: string) => {
+      get: (target: Object, field: string): Promise<Web3Receipt> | any => {
         target._init(at)
         if (field in target) {
           return target[field]
@@ -34,7 +35,7 @@ export default class Contract {
     })
   }
 
-  get account (): string {
+  get account (): Address {
     return Contract.params.account
   }
 
@@ -47,7 +48,7 @@ export default class Contract {
   }
 
   /** @private */
-  _init (at?: string) {
+  _init (at?: Address) {
     try {
       const address = at || this._artifact.networks[Contract.params.id].address
       if (this._contract && this.address === address) {
@@ -101,14 +102,18 @@ export default class Contract {
 
   /**
    * @param method
-   * @returns {Promise.<Object>} transaction receipt
+   * @param value ETH
+   * @returns {Promise.<Web3Receipt>}
    * @protected
    */
-  async _tx (method: Object): Promise<Object> {
-    const from = { from: this.account }
+  async _tx (method: Object, value?: BigNumber): Promise<Web3Receipt> {
+    const preParams = {
+      from: this.account,
+      value: value ? this._toWei(value) : undefined
+    }
     const params = {
-      ...from,
-      gas: await method.estimateGas(from)
+      ...preParams,
+      gas: await method.estimateGas(preParams)
     }
 
     // dry run
@@ -179,7 +184,7 @@ export default class Contract {
    * @returns {Promise}
    * @protected
    */
-  async _apiPut (address: string, data: Object) {
+  async _apiPut (address: Address, data: Object) {
     try {
       return await this._api.post('/offchain', {address, data})
     } catch (e) {
@@ -194,7 +199,7 @@ export default class Contract {
    * @returns {Promise.<?Object>}
    * @protected
    */
-  async _apiGet (address: string): Promise<?Object> {
+  async _apiGet (address: Address): Promise<?Object> {
     try {
       const response = await this._api.get('/offchain/' + address)
       if (response.data.error === true) {
@@ -245,13 +250,17 @@ export default class Contract {
   }
 
   /**
+   * For destructuring Solidity array outputs.
    * @param v
-   * @param unit
-   * @returns {BigNumber}
+   * @returns {Array<any>}
    * @protected
    */
-  _fromWei (v: BigNumber, unit: string = 'ether'): BigNumber {
-    return new BigNumber(Contract.params.web3.utils.fromWei(v, unit))
+  _toArray (v: Object): Array<any> {
+    const result: Array<any> = []
+    for (let key of Object.keys(v)) {
+      result.push(v[key])
+    }
+    return result
   }
 
   /**
@@ -266,10 +275,20 @@ export default class Contract {
 
   /**
    * @param v
+   * @param unit
+   * @returns {BigNumber}
+   * @protected
+   */
+  _fromWei (v: BigNumber, unit: string = 'ether'): BigNumber {
+    return new BigNumber(Contract.params.web3.utils.fromWei(v, unit))
+  }
+
+  /**
+   * @param v
    * @returns {boolean}
    * @protected
    */
-  _isEmptyAddress (v: string): boolean {
+  _isEmptyAddress (v: Address | string): boolean {
     return v === '0x0000000000000000000000000000000000000000'
   }
 }

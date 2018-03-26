@@ -1,18 +1,20 @@
 // @flow
 
-import artifact from 'polymath-core_v2/build/contracts/SecurityTokenRegistrar.json'
+import artifact from 'polymath-core_v2/build/contracts/SecurityTokenRegistry.json'
 import BigNumber from 'bignumber.js'
 
 import Contract from './Contract'
 import PolyToken from './PolyToken'
-import TickerRegistrar from './TickerRegistrar'
+import TickerRegistrar from './TickerRegistry'
 import SecurityTokenContract from './SecurityToken'
 
-import type { SecurityToken, SymbolDetails } from '../../types'
+import type { SecurityToken, SymbolDetails, Address, Web3Receipt } from '../../types'
 
-class SecurityTokenRegistrar extends Contract {
-  getSecurityTokenAddress: Function
-  tokenDetails: Function
+const LOG_NEW_SECURITY_TOKEN = 'LogNewSecurityToken'
+
+class SecurityTokenRegistry extends Contract {
+
+  getSecurityTokenAddress: (ticker: string) => Promise<Address>
 
   fee = new BigNumber(100) // TODO @bshevchenko: temporarily hardcoded
 
@@ -60,7 +62,7 @@ class SecurityTokenRegistrar extends Contract {
       ])
       token.name = name
       token.decimals = decimals
-      token.details = this._toAscii(details)
+      token.details = details
 
       const offchain = token.address ? await this._apiGet(token.address) : null
       if (offchain !== null) {
@@ -74,11 +76,11 @@ class SecurityTokenRegistrar extends Contract {
     return token
   }
 
-  async preAuth () {
-    return await PolyToken.approve(this.address, this.fee)
+  async preAuth (): Promise<Web3Receipt> {
+    return PolyToken.approve(this.address, this.fee)
   }
 
-  async generateSecurityToken (token: SecurityToken) {
+  async generateSecurityToken (token: SecurityToken): Promise<?Web3Receipt> {
     let address = await this.getSecurityTokenAddress(token.ticker)
     let receipt
     if (this._isEmptyAddress(address)) {
@@ -90,7 +92,7 @@ class SecurityTokenRegistrar extends Contract {
           this._toBytes(token.details || '')
         )
       )
-      address = receipt.events.LogNewSecurityToken.returnValues._securityTokenAddress
+      address = receipt.events[LOG_NEW_SECURITY_TOKEN].returnValues._securityTokenAddress
     } else {
       if (!address || await this._apiGet(address) !== null) {
         throw new Error('Token is already generated and supplied with off-chain data')
@@ -104,4 +106,4 @@ class SecurityTokenRegistrar extends Contract {
   }
 }
 
-export default new SecurityTokenRegistrar(artifact)
+export default new SecurityTokenRegistry(artifact)

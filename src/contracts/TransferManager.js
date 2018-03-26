@@ -3,16 +3,17 @@
 import artifact from 'polymath-core_v2/build/contracts/GeneralTransferManager.json' // TODO @bshevchenko: interfaces/ITransferManager
 
 import Contract from './Contract'
-import type { Investor } from '../../types'
+import type { Address, Investor, Web3Receipt } from '../../types'
 
 const LOG_MODIFY_WHITELIST = 'LogModifyWhitelist'
 
 export default class TransferManager extends Contract {
-  constructor (at: string) {
+
+  constructor (at: Address) {
     super(artifact, at)
   }
 
-  async modifyWhitelist (investor: Investor) {
+  async modifyWhitelist (investor: Investor): Promise<Web3Receipt> {
     return this._tx(this._methods.modifyWhitelist(
       investor.address,
       this._toUnixTS(investor.from),
@@ -20,7 +21,7 @@ export default class TransferManager extends Contract {
     ))
   }
 
-  async modifyWhitelistMulti (investors: Array<Investor>) {
+  async modifyWhitelistMulti (investors: Array<Investor>): Promise<Web3Receipt> {
     const addresses: Array<string> = []
     const fromTimes: Array<number> = []
     const toTimes: Array<number> = []
@@ -44,6 +45,8 @@ export default class TransferManager extends Contract {
     for (let event of events) {
       result.push({
         address: event.returnValues._investor,
+        addedBy: event.returnValues.__addedBy,
+        added: this._toDate(event.returnValues._dateAdded),
         from: this._toDate(event.returnValues._fromTime),
         to: this._toDate(event.returnValues._toTime),
       })

@@ -1,6 +1,6 @@
 {
   "name": "polymath.js_v2",
-  "version": "0.2.7",
+  "version": "0.2.8",
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-eslint": "7.2.3",
@@ -24,7 +24,7 @@
   "dependencies": {
     "axios": "0.16.2",
     "bignumber.js": "5.0.0",
-    "polymath-core_v2": "0.1.6",
+    "polymath-core_v2": "0.2.0",
     "redux": "3.7.2",
     "redux-thunk": "2.2.0",
     "web3": "1.0.0-beta.30",
@@ -38,6 +38,7 @@
     "typecheck": "flow",
     "precommit": "lint-staged && npm run typecheck",
     "contracts": "cd node_modules/polymath-core_v2 && yarn && node node_modules/truffle/build/cli.bundled.js migrate --reset --all --network development",
+    "tconsole": "cd node_modules/polymath-core_v2 && yarn && node node_modules/truffle/build/cli.bundled.js console",
     "build": "babel src --out-dir dist",
     "prepublish": "npm run build"
   },

@@ -1,22 +1,25 @@
 // @flow
 
 import artifact from 'polymath-core_v2/build/contracts/CappedSTO.json' // TODO @bshevchenko: interfaces/ISTO
+import BigNumber from 'bignumber.js'
 
 import Contract from './Contract'
 import SecurityToken from './SecurityToken'
-import type { STODetails, STOPurchase } from '../../types'
+import { PolyToken } from '../index'
+import type { Address, STODetails, STOPurchase, Web3Receipt } from '../../types'
 
 const LOG_TOKEN_PURCHASE = 'TokenPurchase'
 
 export default class STO extends Contract {
-  startTime: Function
-  endTime: Function
-  cap: Function
-  weiRaised: Function
+
+  startTime: () => Promise<number>
+  endTime: () => Promise<number>
+  cap: () => Promise<BigNumber>
+  fundsRaised: () => Promise<BigNumber>
 
   token: SecurityToken
 
-  constructor (at: string, _token: SecurityToken) {
+  constructor (at: Address, _token: SecurityToken) {
     super(artifact, at)
     this.token = _token
   }
@@ -26,7 +29,7 @@ export default class STO extends Contract {
       this.startTime(),
       this.endTime(),
       this.cap(),
-      this.weiRaised()
+      this.fundsRaised()
     ])
     return {
       start: this._toDate(startTime),
@@ -42,15 +45,30 @@ export default class STO extends Contract {
       fromBlock: 0,
       toBlock: 'latest'
     })
-
     for (let event of events) {
       result.push({
         investor: event.returnValues.beneficiary,
         txHash: event.transactionHash,
-        amount: this.token.removeDecimals(event.returnValues.amount),
+        amount: await this.token.removeDecimals(event.returnValues.amount),
         paid: this._fromWei(event.returnValues.value)
       })
     }
     return result
+  }
+
+  async buyTokens (beneficiary: Address, value: BigNumber): Promise<Web3Receipt> {
+    return this._tx(
+      this._methods.buyTokens(beneficiary),
+      value
+    )
+  }
+
+  async buyTokensWithPoly (beneficiary: Address, value: BigNumber): Promise<Web3Receipt> {
+    return this._tx(
+      this._methods.buyTokensWithPoly(
+        beneficiary,
+        PolyToken.addDecimals(value)
+      ),
+    )
   }
 }

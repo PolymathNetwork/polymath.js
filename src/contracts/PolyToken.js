@@ -4,22 +4,25 @@ import artifact from 'polymath-core_v2/build/contracts/PolyTokenFaucet.json'
 import BigNumber from 'bignumber.js'
 
 import Contract from './Contract'
-import type { Web3Event } from '../../types'
+import type { Address, Web3Event } from '../../types'
 
 const TRANSFER = 'Transfer'
 
 class PolyToken extends Contract {
-  decimals: number = 18;
 
-  addDecimals (n): BigNumber {
+  decimals: number = 18
+  symbol: string = 'POLY'
+  name: string = 'Polymath Network'
+
+  addDecimals (n: number | BigNumber): BigNumber {
     return new BigNumber(10).toPower(this.decimals).times(n)
   }
 
-  removeDecimals (n): BigNumber {
+  removeDecimals (n: number | BigNumber): BigNumber {
     return new BigNumber(n).div(new BigNumber(10).toPower(this.decimals))
   }
 
-  async balanceOf (account: string): Promise<BigNumber> {
+  async balanceOf (account: Address): Promise<BigNumber> {
     return this.removeDecimals(await this._methods.balanceOf(account).call())
   }
 
@@ -27,7 +30,7 @@ class PolyToken extends Contract {
     return this.balanceOf(this.account)
   }
 
-  async allowance (owner: string, spender: string): Promise<BigNumber> {
+  async allowance (owner: Address, spender: Address): Promise<BigNumber> {
     return this.removeDecimals(
       await this._methods.allowance(owner, spender).call(),
     )
@@ -37,29 +40,29 @@ class PolyToken extends Contract {
     return this._tx(this._methods.getTokens(this.addDecimals(amount), this.account))
   }
 
-  async transfer (to: string, amount: BigNumber) {
+  async transfer (to: Address, amount: BigNumber) {
     return this._tx(this._methods.transfer(to, this.addDecimals(amount)))
   }
 
-  async transferFrom (from: string, to: string, amount: BigNumber) {
+  async transferFrom (from: Address, to: Address, amount: BigNumber) {
     return this._tx(this._methods.transferFrom(from, to, this.addDecimals(amount)))
   }
 
-  async approve (spender: string, amount: BigNumber) {
+  async approve (spender: Address, amount: BigNumber) {
     return this._tx(this._methods.approve(spender, this.addDecimals(amount)))
   }
 
-  async increaseApproval (spender: string, amount: BigNumber) {
+  async increaseApproval (spender: Address, amount: BigNumber) {
     return this._tx(this._methods.increaseApproval(spender, this.addDecimals(amount)))
   }
 
-  async decreaseApproval (spender: string, amount: BigNumber) {
+  async decreaseApproval (spender: Address, amount: BigNumber) {
     return this._tx(this._methods.decreaseApproval(spender, this.addDecimals(amount)))
   }
 
   async subscribeMyTransfers (
-    fromCallback: (from: string, value: BigNumber) => void,
-    toCallback: (to: string, value: BigNumber) => void,
+    fromCallback: (from: Address, value: BigNumber) => void,
+    toCallback: (to: Address, value: BigNumber) => void,
   ) {
     const callback = (event: Web3Event) => {
       const values = event.returnValues

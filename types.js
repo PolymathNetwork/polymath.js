@@ -4,6 +4,10 @@ import BigNumber from 'bignumber.js'
 
 import SecurityTokenContract from './src/contracts/SecurityToken'
 
+/**
+ * CORE TYPES
+ */
+
 export type Web3 = {
   eth: {
     clearSubscriptions: Function,
@@ -20,11 +24,37 @@ export type Web3 = {
   }
 }
 
+export type Web3Event = {
+  returnValues: Object,
+  event: string, // event name
+  blockNumber: number,
+  transactionHash: string,
+}
+
+export type Web3Contract = {
+  events: Object,
+  getPastEvents: (event: string, {
+    filter?: Object,
+    fromBlock?: number | string,
+    toBlock?: number | string,
+  }) => Promise<Array<Web3Event>>,
+}
+
+export type Web3Receipt = {
+  transactionHash: string,
+  blockNumber: number,
+  contractAddress: Address,
+  gasUsed: number,
+  events: { [key: string]: Web3Event },
+}
+
+export type Address = string
+
 export type NetworkParams = {
   id: number,
   web3: Web3,
   web3WS: Web3,
-  account: string,
+  account: Address,
   txHashCallback: (hash: string) => void,
   txEndCallback: (receipt: Object) => void,
 }
@@ -34,28 +64,25 @@ export type Artifact = {
   networks: Object,
 }
 
-export type Web3Contract = {
-  events: Object,
-  getPastEvents: Function,
-}
 
-export type Web3Event = {
-  returnValues: Object,
-}
+/**
+ * POLYMATH TYPES
+ */
 
 export type SymbolDetails = {
   ticker: string,
-  owner: string,
+  owner: Address,
   timestamp: Date,
   contact: string,
   status: boolean,
+  expires: ?Date,
 }
 
 export type SecurityToken = {
   ticker: string,
-  owner: string,
+  owner: Address,
   contact: string,
-  address?: string,
+  address?: Address,
   name?: string,
   decimals?: number,
   details?: string,
@@ -80,14 +107,16 @@ export type STODetails = {
 }
 
 export type STOPurchase = {
-  investor: string,
+  investor: Address,
   txHash: string,
   amount: BigNumber,
   paid: BigNumber,
 }
 
 export type Investor = {
-  address: string,
+  address: Address,
+  addedBy: Address,
+  added: Date,
   from: Date,
   to: Date,
 }
