@@ -24,8 +24,6 @@ class SecurityTokenRegistry extends Contract {
       const currBalance = await PolyToken.myBalance()
       return allowance.gte(this.fee) && currBalance.gte(this.fee)
     } catch (e) {
-      // eslint-disable-next-line
-      console.log('Pre-auth check failed', e)
       return false
     }
   }

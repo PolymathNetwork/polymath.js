@@ -10,12 +10,16 @@ import type { Address, STODetails, STOPurchase, Web3Receipt } from '../../types'
 
 const LOG_TOKEN_PURCHASE = 'TokenPurchase'
 
+export const FUNDRAISE_ETH = 0
+export const FUNDRAISE_POLY = 1
+
 export default class STO extends Contract {
 
   startTime: () => Promise<number>
   endTime: () => Promise<number>
   cap: () => Promise<BigNumber>
   fundsRaised: () => Promise<BigNumber>
+  fundraiseType: () => Promise<number>
 
   token: SecurityToken
 
@@ -56,19 +60,36 @@ export default class STO extends Contract {
     return result
   }
 
-  async buyTokens (beneficiary: Address, value: BigNumber): Promise<Web3Receipt> {
+  async isPolyFundraise (): Promise<boolean> {
+    return await this.fundraiseType() === FUNDRAISE_POLY
+  }
+
+  async isPolyPreAuth (value: BigNumber): Promise<boolean> {
+    try {
+      const allowance = await PolyToken.allowance(this.account, this.address)
+      const currBalance = await PolyToken.myBalance()
+      return allowance.gte(value) && currBalance.gte(value)
+    } catch (e) {
+      return false
+    }
+  }
+
+  async preAuthPoly (value: BigNumber): Promise<Web3Receipt> {
+    return PolyToken.approve(this.address, value)
+  }
+
+  async buy (beneficiary: Address, value: BigNumber): Promise<Web3Receipt> {
+    if (this.isPolyFundraise()) {
+      return this._tx(
+        this._methods.buyTokensWithPoly(
+          beneficiary,
+          PolyToken.addDecimals(value)
+        ),
+      )
+    }
     return this._tx(
       this._methods.buyTokens(beneficiary),
       value
-    )
-  }
-
-  async buyTokensWithPoly (beneficiary: Address, value: BigNumber): Promise<Web3Receipt> {
-    return this._tx(
-      this._methods.buyTokensWithPoly(
-        beneficiary,
-        PolyToken.addDecimals(value)
-      ),
     )
   }
 }

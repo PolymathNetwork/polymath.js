@@ -6,7 +6,7 @@ import BigNumber from 'bignumber.js'
 import Contract from './Contract'
 import PermissionManager from './PermissionManager'
 import TransferManager from './TransferManager'
-import STO from './STO'
+import STO, { FUNDRAISE_ETH, FUNDRAISE_POLY } from './STO'
 import { PolyToken } from '../'
 import type { Address, Web3Receipt } from '../../types'
 
@@ -160,7 +160,7 @@ export default class SecurityToken extends Contract {
       this._toUnixTS(end),
       this._toWei(cap),
       await this.addDecimals(rate),
-      isEth ? 0 : 1,
+      isEth ? FUNDRAISE_ETH : FUNDRAISE_POLY,
       PolyToken.address,
       fundsReceiver
     ])
