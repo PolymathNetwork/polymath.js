@@ -125,8 +125,8 @@ export default class SecurityToken extends Contract {
     factory: Address,
     start: Date,
     end: Date,
-    cap: BigNumber,
-    rate: BigNumber,
+    cap: number,
+    rate: number,
     isEth: boolean, // fundraise type, use true for ETH or false for POLY
     fundsReceiver: Address
   ): Promise<Web3Receipt> {

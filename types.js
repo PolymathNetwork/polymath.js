@@ -99,6 +99,16 @@ export type SecurityToken = {
   isComplete: boolean,
 }
 
+export type STOFactory = {
+  title: string,
+  name: string,
+  usedBy: Array<string>,
+  desc: string,
+  isVerified: boolean,
+  securityAuditBy: string,
+  address: Address,
+}
+
 export type STODetails = {
   start: Date,
   end: Date,
