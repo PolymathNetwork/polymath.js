@@ -1,29 +1,44 @@
-# Introducing Polymath.js v2.0
+<a href="https://t.me/polymathnetwork"><img src="https://img.shields.io/badge/50k+-telegram-blue.svg" target="_blank"></a>
 
-TODO Update
+![Polymath](Polymath.png)
 
+# Polymath.js
+
+Bridge between the [Polymath Smart Contracts](https://github.com/PolymathNetwork/polymath-core) and dApps.
+
+## Install
+
+```bash
+> yarn add polymathjs
 ```
-await SecurityTokenRegistry.createSecurityToken(token)
-```
-This is all you need to create new security token using Polymath.js v2.0. It will:
-1. Format data into the blockchain types (e.g. add decimals for token values).
-2. Properly estimate gas via Web3 1.0.
-3. Make dry run to validate inputs before transaction sending.
-4. Notify callbacks with transaction hash and receipt.
-5. Check whether the transaction was mined without errors or not.
-6. Send necessary requests to the `polymath-api`.
 
-## Key advantages
-1. Web3 1.0. It means that we don't need truffle-contract package anymore and we can use async-await, websockets for events (there was bug with disconnection from them, but now it's fixed), proper auto gas estimation.
-2. No need to wrap each contract function since v2.0 uses JavaScript Proxy API, which in a simplified manner calls original method if it's not overridden.
-```
-await PolyToken.symbol()
-```
-There is no `symbol` entry within the `PolyToken` class, but string above will return you ticker of the Polymath token.
-This is how it works.
+```javascript
+import Contract, { TickerRegistry } from 'polymathjs'
+import type { NetworkParams } from 'polymathjs/types'
 
-No excess wrappers means no excess documentation and tests.
+const params: NetworkParams = {
+  id: 1, // network id
+  web3, // Web3 1.0 instance
+  web3WS, // Web3 1.0 instance supplied with WebsocketProvider, it can be the same instance as the one above
+  account: '0xaea186fa5402f0a8049786099c3f2881c1e21767', // transactions sender
+  txHashCallback: (hash) => console.log(hash), // receives a transaction hash every time one was generated
+  txEndCallback: (receipt) => console.log(receipt), // receives a transaction receipt every time one was mined
+}
 
-## Needs from polymath-core
-1. Versioned npm package (with changelog for each new version) with built-in contracts artifacts, which should contain contracts addresses for each network.
-2. Complete and up-to-date documentation since Polymath.js will inherit it in many ways.
+Contract.setParams(params)
+```
+
+Consider using the [polymath-auth](https://www.npmjs.com/package/polymath-auth) library, which takes care of the
+first 4 params.
+
+## Development
+After cloning, to install all dependencies run:
+```bash
+> yarn
+```
+We only use Yarn as our official Node package manager, and so we will only commit yarn.lock files, and ignore package-lock.json files.
+
+To build module run:
+```
+npm run build
+```

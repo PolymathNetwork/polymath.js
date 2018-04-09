@@ -1,6 +1,6 @@
 // @flow
 
-import artifact from 'polymath-core_v2/build/contracts/GeneralTransferManager.json' // TODO @bshevchenko: interfaces/ITransferManager
+import artifact from 'polymath-core/build/contracts/GeneralTransferManager.json' // TODO @bshevchenko: ITransferManager
 
 import Contract from './Contract'
 import type { Address, Investor, Web3Receipt } from '../../types'
@@ -45,7 +45,7 @@ export default class TransferManager extends Contract {
     for (let event of events) {
       result.push({
         address: event.returnValues._investor,
-        addedBy: event.returnValues.__addedBy,
+        addedBy: event.returnValues._addedBy,
         added: this._toDate(event.returnValues._dateAdded),
         from: this._toDate(event.returnValues._fromTime),
         to: this._toDate(event.returnValues._toTime),

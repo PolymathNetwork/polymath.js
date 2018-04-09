@@ -1,18 +1,16 @@
 // @flow
 
 import BigNumber from 'bignumber.js'
-import axios from 'axios'
 
 import type { NetworkParams, Artifact, Web3Contract, Web3Event, Address, Web3Receipt } from '../../types'
 
 export default class Contract {
 
-  static params: NetworkParams
+  static _params: NetworkParams
   _artifact: Artifact
   _contract: Web3Contract
   _contractWS: Web3Contract
   _methods: Object
-  _api = axios.create({ baseURL: 'https://polymath-api-staging.herokuapp.com' })
   address: Address
 
   constructor (artifact: Artifact, at?: Address) {
@@ -35,31 +33,36 @@ export default class Contract {
     })
   }
 
+  static setParams (params: NetworkParams) {
+    Contract._params = params
+  }
+
   get account (): Address {
-    return Contract.params.account
+    return Contract._params.account
   }
 
   /** @private */
   _newContract (isWebSockets: boolean = false) {
     return new (isWebSockets
-      ? Contract.params.web3WS
-      : Contract.params.web3
+      ? Contract._params.web3WS
+      : Contract._params.web3
     ).eth.Contract(this._artifact.abi, this.address)
   }
 
   /** @private */
   _init (at?: Address) {
     try {
-      const address = at || this._artifact.networks[Contract.params.id].address
+      const address = at || this._artifact.networks[Contract._params.id].address
       if (this._contract && this.address === address) {
         return
       }
       this.address = address
     } catch (e) {
-      throw new Error('Contract is not deployed to the network ' + Contract.params.id)
+      throw new Error('Contract is not deployed to the network ' + Contract._params.id)
     }
     this._contract = this._newContract()
-    this._contractWS = Contract.params.web3WS === Contract.params.web3 ? this._contract : this._newContract(true)
+    this._contractWS = Contract._params.web3WS === Contract._params.web3 ? this._contract : this._newContract(true)
+    // noinspection JSUnresolvedVariable
     this._methods = this._contract.methods
   }
 
@@ -73,6 +76,7 @@ export default class Contract {
     for (let i = 0; i < this._artifact.abi.length; i++) {
       const method = this._artifact.abi[i]
       if (method.name === name) {
+        // noinspection JSUnresolvedVariable
         return method.stateMutability === 'view'
       }
     }
@@ -113,7 +117,7 @@ export default class Contract {
     }
     const params = {
       ...preParams,
-      gas: await method.estimateGas(preParams)
+      gas: Math.floor(await method.estimateGas(preParams) * 1.05) // TODO @bshevchenko: https://github.com/PolymathNetwork/polymath.js/issues/4
     }
 
     // dry run
@@ -129,10 +133,10 @@ export default class Contract {
 
     const receipt = await method.send(params, (error, hash) => {
       if (!error) {
-        Contract.params.txHashCallback(hash)
+        Contract._params.txHashCallback(hash)
       }
     })
-    Contract.params.txEndCallback(receipt)
+    Contract._params.txEndCallback(receipt)
 
     if (receipt.status === '0x0') {
       throw new Error('Transaction failed')
@@ -170,47 +174,11 @@ export default class Contract {
 
   static unsubscribe (): boolean {
     try {
-      Contract.params.web3WS.eth.clearSubscriptions()
+      Contract._params.web3WS.eth.clearSubscriptions()
     } catch (e) {
       // TODO @bshevchenko: clearSubscriptions throws error when no subscriptions and probably subscriptions are not tracked at all
     }
     return true
-  }
-
-  /**
-   * TODO @bshevchenko: user should be authorized to put data
-   * @param address
-   * @param data
-   * @returns {Promise}
-   * @protected
-   */
-  async _apiPut (address: Address, data: Object) {
-    try {
-      return await this._api.post('/offchain', {address, data})
-    } catch (e) {
-      // eslint-disable-next-line
-      console.warn('_apiPut', address, data, e)
-      return null
-    }
-  }
-
-  /**
-   * @param address of contract
-   * @returns {Promise.<?Object>}
-   * @protected
-   */
-  async _apiGet (address: Address): Promise<?Object> {
-    try {
-      const response = await this._api.get('/offchain/' + address)
-      if (response.data.error === true) {
-        return null
-      }
-      return response.data
-    } catch (e) {
-      // eslint-disable-next-line
-      console.warn('_apiGet', address, e)
-      return null
-    }
   }
 
   /**
@@ -219,7 +187,7 @@ export default class Contract {
    * @protected
    */
   _toBytes (v: string): string {
-    return Contract.params.web3.utils.asciiToHex(v)
+    return Contract._params.web3.utils.asciiToHex(v)
   }
 
   /**
@@ -228,7 +196,7 @@ export default class Contract {
    * @protected
    */
   _toAscii (v: string): string {
-    return Contract.params.web3.utils.hexToAscii(v).replace(/\u0000/g, '')
+    return Contract._params.web3.utils.hexToAscii(v).replace(/\u0000/g, '')
   }
 
   /**
@@ -270,7 +238,7 @@ export default class Contract {
    * @protected
    */
   _toWei (v: BigNumber, unit: string = 'ether'): BigNumber {
-    return new BigNumber(Contract.params.web3.utils.toWei(v, unit))
+    return new BigNumber(Contract._params.web3.utils.toWei(v, unit))
   }
 
   /**
@@ -280,7 +248,7 @@ export default class Contract {
    * @protected
    */
   _fromWei (v: BigNumber, unit: string = 'ether'): BigNumber {
-    return new BigNumber(Contract.params.web3.utils.fromWei(v, unit))
+    return new BigNumber(Contract._params.web3.utils.fromWei(v, unit))
   }
 
   /**

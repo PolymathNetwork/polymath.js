@@ -8,13 +8,14 @@ import SecurityTokenContract from './src/contracts/SecurityToken'
  * CORE TYPES
  */
 
-export type Web3 = {
+export type Web3 = {|
   eth: {
     clearSubscriptions: Function,
     abi: {
       encodeFunctionCall: Function
     },
-    Contract: Function
+    Contract: Function,
+    sign: (dataToSign: any, address: Address) => Promise<string>
   },
   utils: {
     toWei: Function,
@@ -22,84 +23,86 @@ export type Web3 = {
     asciiToHex: Function,
     hexToAscii: Function
   }
-}
+|}
 
-export type Web3Event = {
+export type Web3Event = {|
   returnValues: Object,
   event: string, // event name
   blockNumber: number,
   transactionHash: string,
-}
+|}
 
-export type Web3Contract = {
+export type Web3Contract = {|
   events: Object,
   getPastEvents: (event: string, {
     filter?: Object,
     fromBlock?: number | string,
     toBlock?: number | string,
   }) => Promise<Array<Web3Event>>,
-}
+|}
 
-export type Web3Receipt = {
+export type Web3Receipt = {|
   transactionHash: string,
   blockNumber: number,
   contractAddress: Address,
   gasUsed: number,
   events: { [key: string]: Web3Event },
-}
+|}
 
 export type Address = string
 
-export type NetworkParams = {
+export type NetworkParams = {|
   id: number,
   web3: Web3,
   web3WS: Web3,
   account: Address,
   txHashCallback: (hash: string) => void,
   txEndCallback: (receipt: Object) => void,
-}
+|}
 
-export type Artifact = {
+export type Artifact = {|
   abi: Object,
   networks: Object,
-}
+|}
 
 
 /**
  * POLYMATH TYPES
  */
 
-export type SymbolDetails = {
+export type SymbolDetails = {|
   ticker: string,
-  owner: Address,
-  timestamp: Date,
-  contact: string,
-  status: boolean,
-  expires: ?Date,
-}
+  name: string,
+  timestamp?: Date,
+  status?: boolean,
+  expires?: ?Date,
+  owner?: Address,
+  txHash?: string,
 
-export type SecurityToken = {
+  // off-chain
+  company: string,
+  desc: string,
+|}
+
+export type SecurityToken = {|
   ticker: string,
+  name: string,
+  timestamp: Date,
+  status: boolean,
   owner: Address,
-  contact: string,
+  expires: ?Date,
+  txHash: string, // ticker registration or token deployment (depends on status)
+
   address?: Address,
-  name?: string,
   decimals?: number,
-  details?: string,
   contract?: SecurityTokenContract,
 
   // off-chain
-  url?: string,
-  firstName?: string,
-  lastName?: string,
-  desc?: string,
+  company: string,
+  desc: string,
+|}
 
-  // flags
-  isGenerated: boolean,
-  isComplete: boolean,
-}
-
-export type STOFactory = {
+export type STOFactory = {|
   title: string,
   name: string,
   usedBy: Array<string>,
@@ -107,26 +110,29 @@ export type STOFactory = {
   isVerified: boolean,
   securityAuditBy: string,
   address: Address,
-}
+|}
 
-export type STODetails = {
+export type STODetails = {|
   start: Date,
   end: Date,
   cap: BigNumber,
   raised: BigNumber,
-}
+  investorCount: number,
+  tokensSold: BigNumber,
+  isPolyFundraise: boolean,
+|}
 
-export type STOPurchase = {
+export type STOPurchase = {|
   investor: Address,
   txHash: string,
   amount: BigNumber,
   paid: BigNumber,
-}
+|}
 
-export type Investor = {
+export type Investor = {|
   address: Address,
   addedBy: Address,
   added: Date,
   from: Date,
   to: Date,
-}
+|}

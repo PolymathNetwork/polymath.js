@@ -1,6 +1,6 @@
 // @flow
 
-import artifact from 'polymath-core_v2/build/contracts/SecurityToken.json'
+import artifact from 'polymath-core/build/contracts/SecurityToken.json'
 import BigNumber from 'bignumber.js'
 
 import Contract from './Contract'
@@ -19,6 +19,7 @@ const LOG_MODULE_ADDED = 'LogModuleAdded'
 export default class SecurityToken extends Contract {
 
   name: () => Promise<string>
+  tokenDetails: () => Promise<string> // IPFS hash
 
   _decimals: number
 
@@ -35,10 +36,6 @@ export default class SecurityToken extends Contract {
       this._decimals = await this._methods.decimals().call()
     }
     return this._decimals
-  }
-
-  async tokenDetails (): Promise<string> {
-    return this._toAscii(await this._methods.tokenDetails().call())
   }
 
   async addDecimals (n: number | BigNumber): Promise<BigNumber> {
@@ -130,7 +127,7 @@ export default class SecurityToken extends Contract {
     isEth: boolean, // fundraise type, use true for ETH or false for POLY
     fundsReceiver: Address
   ): Promise<Web3Receipt> {
-    const data = Contract.params.web3.eth.abi.encodeFunctionCall({
+    const data = Contract._params.web3.eth.abi.encodeFunctionCall({
       name: 'configure',
       type: 'function',
       inputs: [{
@@ -168,6 +165,7 @@ export default class SecurityToken extends Contract {
       this._methods.addModule(
         factory,
         data,
+        0,
         0,
         false
       )

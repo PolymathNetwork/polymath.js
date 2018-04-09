@@ -1,6 +1,6 @@
 {
-  "name": "polymath.js_v2",
-  "version": "0.2.12",
+  "name": "polymathjs",
+  "version": "0.3.1",
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-eslint": "7.2.3",
@@ -16,15 +16,16 @@
     "babel-preset-stage-0": "^6.0.15",
     "eslint": "4.11.0",
     "eslint-plugin-polymath": "github:PolymathNetwork/eslint-plugin-polymath",
+    "flow-bin": "^0.68.0",
     "husky": "0.14.3",
     "lint-staged": "5.0.0",
-    "npm-run-all": "4.0.2",
-    "flow-bin": "^0.68.0"
+    "npm-run-all": "4.0.2"
   },
   "dependencies": {
-    "axios": "0.16.2",
     "bignumber.js": "5.0.0",
-    "polymath-core_v2": "0.2.0",
+    "bs58": "^4.0.1",
+    "ipfs-api": "^20.0.0",
+    "polymath-core": "0.3.1",
     "redux": "3.7.2",
     "redux-thunk": "2.2.0",
     "web3": "1.0.0-beta.30",
@@ -37,8 +38,8 @@
     "lint": "eslint --fix src",
     "typecheck": "flow",
     "precommit": "lint-staged && npm run typecheck",
-    "contracts": "cd node_modules/polymath-core_v2 && yarn && node node_modules/truffle/build/cli.bundled.js migrate --reset --all --network development",
-    "tconsole": "cd node_modules/polymath-core_v2 && yarn && node node_modules/truffle/build/cli.bundled.js console",
+    "contracts": "cd node_modules/polymath-core && yarn && node node_modules/truffle/build/cli.bundled.js migrate --reset --all --network development",
+    "tconsole": "cd node_modules/polymath-core && yarn && node node_modules/truffle/build/cli.bundled.js console",
     "build": "babel src --out-dir dist",
     "prepublish": "npm run build"
   },

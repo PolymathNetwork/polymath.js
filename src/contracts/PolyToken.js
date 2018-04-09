@@ -1,6 +1,6 @@
 // @flow
 
-import artifact from 'polymath-core_v2/build/contracts/PolyTokenFaucet.json'
+import artifact from 'polymath-core/build/contracts/PolyTokenFaucet.json'
 import BigNumber from 'bignumber.js'
 
 import Contract from './Contract'
@@ -13,6 +13,8 @@ class PolyToken extends Contract {
   decimals: number = 18
   symbol: string = 'POLY'
   name: string = 'Polymath Network'
+
+  allowance: (owner: Address, spender: Address) => Promise<BigNumber>
 
   addDecimals (n: number | BigNumber): BigNumber {
     return new BigNumber(10).toPower(this.decimals).times(n)
@@ -34,10 +36,6 @@ class PolyToken extends Contract {
     return this.removeDecimals(
       await this._methods.allowance(owner, spender).call(),
     )
-  }
-
-  async getTokens (amount: BigNumber) {
-    return this._tx(this._methods.getTokens(this.addDecimals(amount), this.account))
   }
 
   async transfer (to: Address, amount: BigNumber) {

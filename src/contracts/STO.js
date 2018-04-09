@@ -1,6 +1,6 @@
 // @flow
 
-import artifact from 'polymath-core_v2/build/contracts/CappedSTO.json' // TODO @bshevchenko: interfaces/ISTO
+import artifact from 'polymath-core/build/contracts/CappedSTO.json' // TODO @bshevchenko: ISTO
 import BigNumber from 'bignumber.js'
 
 import Contract from './Contract'
@@ -15,11 +15,13 @@ export const FUNDRAISE_POLY = 1
 
 export default class STO extends Contract {
 
+  wallet: () => Promise<Address>
   startTime: () => Promise<number>
   endTime: () => Promise<number>
   cap: () => Promise<BigNumber>
   fundsRaised: () => Promise<BigNumber>
   fundraiseType: () => Promise<number>
+  investorCount: () => Promise<number>
 
   token: SecurityToken
 
@@ -28,18 +30,34 @@ export default class STO extends Contract {
     this.token = _token
   }
 
+  async tokensSold (): Promise<BigNumber> {
+    return this.token.removeDecimals(
+      await this._methods.tokensSold().call()
+    )
+  }
+
+  async isPolyFundraise (): Promise<boolean> {
+    return Number(await this.fundraiseType()) === FUNDRAISE_POLY
+  }
+
   async getDetails (): Promise<STODetails> {
-    const [startTime, endTime, cap, weiRaised] = await Promise.all([
+    const [startTime, endTime, cap, weiRaised, investorCount, tokensSold, isPolyFundraise] = await Promise.all([
       this.startTime(),
       this.endTime(),
       this.cap(),
-      this.fundsRaised()
+      this.fundsRaised(),
+      this.investorCount(),
+      this.tokensSold(),
+      this.isPolyFundraise(),
     ])
     return {
       start: this._toDate(startTime),
       end: this._toDate(endTime),
       cap: this._fromWei(cap),
       raised: this._fromWei(weiRaised),
+      investorCount,
+      tokensSold,
+      isPolyFundraise,
     }
   }
 
@@ -49,19 +67,19 @@ export default class STO extends Contract {
       fromBlock: 0,
       toBlock: 'latest'
     })
+    const isPolyFundraise = await this.isPolyFundraise()
     for (let event of events) {
+      // noinspection JSUnresolvedVariable
       result.push({
         investor: event.returnValues.beneficiary,
         txHash: event.transactionHash,
         amount: await this.token.removeDecimals(event.returnValues.amount),
-        paid: this._fromWei(event.returnValues.value)
+        paid: isPolyFundraise ?
+          this._fromWei(event.returnValues.value) :
+          PolyToken.removeDecimals(event.returnValues.value)
       })
     }
     return result
-  }
-
-  async isPolyFundraise (): Promise<boolean> {
-    return await this.fundraiseType() === FUNDRAISE_POLY
   }
 
   async isPolyPreAuth (value: BigNumber): Promise<boolean> {
@@ -78,17 +96,16 @@ export default class STO extends Contract {
     return PolyToken.approve(this.address, value)
   }
 
-  async buy (beneficiary: Address, value: BigNumber): Promise<Web3Receipt> {
+  async buy (value: BigNumber): Promise<Web3Receipt> {
     if (this.isPolyFundraise()) {
       return this._tx(
         this._methods.buyTokensWithPoly(
-          beneficiary,
           PolyToken.addDecimals(value)
         ),
       )
     }
     return this._tx(
-      this._methods.buyTokens(beneficiary),
+      this._methods.buyTokens(this.account),
       value
     )
   }

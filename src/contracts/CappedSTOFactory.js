@@ -1,6 +1,6 @@
 // @flow
 
-import artifact from 'polymath-core_v2/build/contracts/CappedSTOFactory.json'
+import artifact from 'polymath-core/build/contracts/CappedSTOFactory.json'
 
 import Contract from './Contract'
 

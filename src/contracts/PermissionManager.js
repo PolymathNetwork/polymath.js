@@ -1,6 +1,6 @@
 // @flow
 
-import artifact from 'polymath-core_v2/build/contracts/GeneralPermissionManager.json' // TODO @bshevchenko: interfaces/IPermissionManager
+import artifact from 'polymath-core/build/contracts/GeneralPermissionManager.json' // TODO @bshevchenko: IPermissionManager
 
 import Contract from './Contract'
 import type { Address } from '../../types'
