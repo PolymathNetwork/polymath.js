@@ -133,6 +133,6 @@ export type Investor = {|
   address: Address,
   addedBy: Address,
   added: Date,
-  from: Date,
-  to: Date,
+  from: Date | 0,
+  to: Date | 0,
 |}

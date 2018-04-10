@@ -204,8 +204,8 @@ export default class Contract {
    * @returns {number}
    * @protected
    */
-  _toUnixTS (v: Date): number {
-    return Math.floor(v.getTime() / 1000)
+  _toUnixTS (v: Date | 0): number {
+    return v === 0 ? 0 : Math.floor(v.getTime() / 1000)
   }
 
   /**
