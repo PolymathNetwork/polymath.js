@@ -1,19 +1,26 @@
-import ipfsAPI from 'ipfs-api'
+// import ipfsAPI from 'ipfs-api'
 import bs58 from 'bs58'
 
 class IPFS {
 
   constructor () {
-    this._ipfs = ipfsAPI({ host: 'ipfs.infura.io', protocol: 'https' })
+    // this._ipfs = ipfsAPI({ host: 'ipfs.infura.io', protocol: 'https' })
   }
 
   async put (data: Object, bytes32: boolean = true): Promise<string> {
     // noinspection JSUnresolvedVariable
-    const node = await this._ipfs.object.put({
-      Data: JSON.stringify(data),
-      Links: []
-    })
-    const hash = node.toJSON().multihash
+    // const node = await this._ipfs.object.put({
+    //   Data: JSON.stringify(data),
+    //   Links: []
+    // })
+    // const hash = node.toJSON().multihash
+    let id = localStorage.getItem('ipfsCount') || 10
+    if (id >= 100) {
+      id = 10
+    }
+    localStorage.setItem('ipfsCount', id + 1)
+    const hash = `QmYwAPJzv5CZsnA625s3Xf2nemtYgPpHdWEz${id}ojWnPbdG`
+    localStorage.setItem(hash, JSON.stringify(data))
     return bytes32 ? this.fromIPFSHash(hash) : hash
   }
 
@@ -24,7 +31,8 @@ class IPFS {
     }
     try {
       // noinspection JSUnresolvedVariable
-      return JSON.parse(await this._ipfs.object.data(hash))
+      // return JSON.parse(await this._ipfs.object.data(hash))
+      return JSON.parse(localStorage.getItem(hash))
     } catch (e) {
       // eslint-disable-next-line
       console.error('IPFS get', e)
