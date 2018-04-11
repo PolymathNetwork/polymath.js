@@ -117,7 +117,7 @@ export default class Contract {
     }
     const params = {
       ...preParams,
-      gas: Math.floor(await method.estimateGas(preParams) * 1.05) // TODO @bshevchenko: https://github.com/PolymathNetwork/polymath.js/issues/4
+      gas: Math.floor(await method.estimateGas(preParams) * 2) // TODO @bshevchenko: https://github.com/PolymathNetwork/polymath.js/issues/4
     }
 
     // dry run
