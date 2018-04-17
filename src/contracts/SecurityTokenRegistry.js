@@ -36,7 +36,9 @@ class SecurityTokenRegistry extends Contract {
     tokenDetails: string = ''
   ): Promise<?Web3Receipt> {
     return await this._tx(
-      this._methods.generateSecurityToken(name, symbol, decimals, this._toBytes(tokenDetails))
+      this._methods.generateSecurityToken(name, symbol, decimals, this._toBytes(tokenDetails)),
+      null,
+      1.05,
     )
   }
 }

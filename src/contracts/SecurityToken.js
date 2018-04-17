@@ -168,7 +168,9 @@ export default class SecurityToken extends Contract {
         0,
         0,
         false
-      )
+      ),
+      null,
+      1.05,
     )
   }
 }

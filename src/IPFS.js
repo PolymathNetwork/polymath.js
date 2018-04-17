@@ -14,9 +14,9 @@ class IPFS {
     //   Links: []
     // })
     // const hash = node.toJSON().multihash
-    let id = localStorage.getItem('ipfsCount') || 10
+    let id = localStorage.getItem('ipfsCount') || 11
     if (id >= 100) {
-      id = 10
+      id = 11
     }
     localStorage.setItem('ipfsCount', id + 1)
     const hash = `QmYwAPJzv5CZsnA625s3Xf2nemtYgPpHdWEz${id}ojWnPbdG`

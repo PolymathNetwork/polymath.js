@@ -107,17 +107,24 @@ export default class Contract {
   /**
    * @param method
    * @param value ETH
+   * @param gasLimit gas limit multiplier or exact amount of gas
    * @returns {Promise.<Web3Receipt>}
    * @protected
    */
-  async _tx (method: Object, value?: BigNumber): Promise<Web3Receipt> {
+  async _tx (method: Object, value?: BigNumber, gasLimit?: number): Promise<Web3Receipt> {
     const preParams = {
       from: this.account,
       value: value ? this._toWei(value) : undefined
     }
+    let gas
+    if (gasLimit && gasLimit > 10) {
+      gas = gasLimit
+    } else {
+      gas = Math.ceil(await method.estimateGas(preParams) * (gasLimit || 1))
+    }
     const params = {
       ...preParams,
-      gas: Math.floor(await method.estimateGas(preParams) * 2) // TODO @bshevchenko: https://github.com/PolymathNetwork/polymath.js/issues/4
+      gas
     }
 
     // dry run

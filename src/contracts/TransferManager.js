@@ -14,11 +14,15 @@ export default class TransferManager extends Contract {
   }
 
   async modifyWhitelist (investor: Investor): Promise<Web3Receipt> {
-    return this._tx(this._methods.modifyWhitelist(
-      investor.address,
-      this._toUnixTS(investor.from),
-      this._toUnixTS(investor.to),
-    ))
+    return this._tx(
+      this._methods.modifyWhitelist(
+        investor.address,
+        this._toUnixTS(investor.from),
+        this._toUnixTS(investor.to),
+      ),
+      null,
+      2
+    )
   }
 
   async modifyWhitelistMulti (investors: Array<Investor>): Promise<Web3Receipt> {
@@ -32,7 +36,11 @@ export default class TransferManager extends Contract {
       toTimes.push(this._toUnixTS(investor.to))
     }
 
-    return this._tx(this._methods.modifyWhitelistMulti(addresses, fromTimes, toTimes))
+    return this._tx(
+      this._methods.modifyWhitelistMulti(addresses, fromTimes, toTimes),
+      null,
+      2
+    )
   }
 
   async getWhitelist (): Promise<Array<Investor>> {
