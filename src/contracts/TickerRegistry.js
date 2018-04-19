@@ -10,8 +10,6 @@ import type { SymbolDetails, Web3Receipt } from '../../types'
 const LOG_REGISTER_TICKER = 'LogRegisterTicker'
 
 type TickerIPFS = {
-  company?: string,
-  desc?: string,
 }
 
 class TickerRegistry extends Contract {
@@ -58,7 +56,7 @@ class TickerRegistry extends Contract {
   }
 
   async registerTicker (details: SymbolDetails): Promise<Web3Receipt> {
-    const ipfs: TickerIPFS = { company: details.company, desc: details.desc }
+    const ipfs: TickerIPFS = { }
     const hash = await IPFS.put(ipfs)
     return await this._tx(
       this._methods.registerTicker(this.account, details.ticker, details.name, hash)

@@ -1,6 +1,6 @@
 {
   "name": "polymathjs",
-  "version": "0.4.7",
+  "version": "0.4.8",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/PolymathNetwork/polymath.js.git"
@@ -34,7 +34,7 @@
     "babel-preset-flow": "^6.23.0",
     "babel-preset-stage-0": "^6.0.15",
     "eslint": "4.11.0",
-    "eslint-plugin-polymath": "github:PolymathNetwork/eslint-plugin-polymath",
+    "eslint-plugin-polymath": "github:PolymathNetwork/eslint-plugin-polymath#3.0.0",
     "flow-bin": "^0.68.0",
     "husky": "0.14.3",
     "lint-staged": "5.0.0",

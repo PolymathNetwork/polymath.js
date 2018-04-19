@@ -183,7 +183,7 @@ export default class Contract {
     try {
       Contract._params.web3WS.eth.clearSubscriptions()
     } catch (e) {
-      // TODO @bshevchenko: clearSubscriptions throws error when no subscriptions and probably subscriptions are not tracked at all
+      // TODO @bshevchenko: throws error when no subscriptions and probably subscriptions are not tracked at all
     }
     return true
   }

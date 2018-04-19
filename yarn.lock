@@ -1852,9 +1852,9 @@ eslint-plugin-async-await@0.0.0:
   version "0.0.0"
   resolved "https://registry.yarnpkg.com/eslint-plugin-async-await/-/eslint-plugin-async-await-0.0.0.tgz#0f2ae17a3814780635d48f2409df9e37898ca09f"
 
-"eslint-plugin-polymath@github:PolymathNetwork/eslint-plugin-polymath":
+"eslint-plugin-polymath@github:PolymathNetwork/eslint-plugin-polymath#3.0.0":
   version "1.0.0"
-  resolved "https://codeload.github.com/PolymathNetwork/eslint-plugin-polymath/tar.gz/86f3c5eb0cedfdeabebc235a32ce0c75a9373c7e"
+  resolved "https://codeload.github.com/PolymathNetwork/eslint-plugin-polymath/tar.gz/0d48ee281faddae343a67088fbbeead0052ad310"
   dependencies:
     eslint-plugin-async-await "0.0.0"
 
