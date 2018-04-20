@@ -58,22 +58,15 @@ class PolyToken extends Contract {
     return this._tx(this._methods.decreaseApproval(spender, this.addDecimals(amount)))
   }
 
-  async subscribeMyTransfers (
-    fromCallback: (from: Address, value: BigNumber) => void,
-    toCallback: (to: Address, value: BigNumber) => void,
-  ) {
-    const callback = (event: Web3Event) => {
+  async subscribeMyTransfers (callback: (toOrFrom: Address, value: BigNumber, isFrom: boolean) => void) {
+    const callbackInternal = (event: Web3Event) => {
       const values = event.returnValues
-      const value = new BigNumber(values.value)
-      if (values.from === this.account) {
-        fromCallback(values.from, value)
-      } else {
-        toCallback(values.to, value)
-      }
+      const value = new BigNumber(values._value)
+      callback(values._from, value, values._from === this.account)
     }
     return Promise.all([
-      this.subscribe(TRANSFER, { from: this.account }, callback),
-      this.subscribe(TRANSFER, { to: this.account }, callback)
+      this.subscribe(TRANSFER, { from: this.account }, callbackInternal),
+      this.subscribe(TRANSFER, { to: this.account }, callbackInternal)
     ])
   }
 }

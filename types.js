@@ -105,11 +105,14 @@ export type SecurityToken = {|
 export type STOFactory = {|
   title: string,
   name: string,
-  usedBy: Array<string>,
   desc: string,
   isVerified: boolean,
-  securityAuditBy: string,
+  securityAuditLink: {
+    title: string,
+    url: string,
+  },
   address: Address,
+  owner: Address,
 |}
 
 export type STODetails = {|
