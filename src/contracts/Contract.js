@@ -138,18 +138,46 @@ export default class Contract {
       throw new Error(`Transaction dry run failed: ${e.message}`)
     }
 
-    const receipt = await method.send(params, (error, hash) => {
-      if (!error) {
-        Contract._params.txHashCallback(hash)
-      }
-    })
-    Contract._params.txEndCallback(receipt)
+    let receipt
+    let txHash
 
-    if (receipt.status === '0x0') {
-      throw new Error('Transaction failed')
+    const end = () => {
+      Contract._params.txEndCallback(receipt)
+      if (receipt.status === '0x0') {
+        throw new Error('Transaction failed')
+      }
+      return receipt
     }
 
-    return receipt
+    try {
+      receipt = await method.send(params, (error, hash) => {
+        if (!error) {
+          txHash = hash
+          Contract._params.txHashCallback(hash)
+        }
+      })
+    } catch (e) {
+      if (e.message.includes('not mined within 50 blocks')) {
+        return new Promise((resolve) => {
+          const handle = setInterval(async () => {
+            try {
+              receipt = await Contract._params.web3.eth.getTransactionReceipt(txHash)
+            } catch (e) {
+              // skip
+            }
+            if (receipt != null && receipt.blockNumber > 0) {
+              clearInterval(handle)
+              resolve(end())
+            }
+          }, 1000)
+        })
+      }
+      if (e.message.includes('denied transaction signature')) {
+        throw new Error('Transaction was cancelled')
+      }
+    }
+
+    return end()
   }
 
   async subscribe (

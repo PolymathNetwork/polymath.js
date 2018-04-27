@@ -128,7 +128,7 @@ export default class SecurityToken extends Contract {
     fundsReceiver: Address
   ): Promise<Web3Receipt> {
     const data = Contract._params.web3.eth.abi.encodeFunctionCall({
-      name: 'configure',
+      name: 'configure', // TODO @bshevchenko: can we grab this ABI from the artifact?
       type: 'function',
       inputs: [{
         type: 'uint256',

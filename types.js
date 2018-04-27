@@ -11,6 +11,7 @@ import SecurityTokenContract from './src/contracts/SecurityToken'
 export type Web3 = {|
   eth: {
     clearSubscriptions: Function,
+    getTransactionReceipt: Function,
     abi: {
       encodeFunctionCall: Function
     },
@@ -78,10 +79,6 @@ export type SymbolDetails = {|
   expires?: ?Date,
   owner?: Address,
   txHash?: string,
-
-  // off-chain
-  company: string,
-  desc: string,
 |}
 
 export type SecurityToken = {|
@@ -96,10 +93,6 @@ export type SecurityToken = {|
   address?: Address,
   decimals?: number,
   contract?: SecurityTokenContract,
-
-  // off-chain
-  company: string,
-  desc: string,
 |}
 
 export type STOFactory = {|
@@ -119,6 +112,7 @@ export type STODetails = {|
   start: Date,
   end: Date,
   cap: BigNumber,
+  rate: BigNumber,
   raised: BigNumber,
   investorCount: number,
   tokensSold: BigNumber,

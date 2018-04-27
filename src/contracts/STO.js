@@ -19,6 +19,7 @@ export default class STO extends Contract {
   startTime: () => Promise<number>
   endTime: () => Promise<number>
   cap: () => Promise<BigNumber>
+  rate: () => Promise<BigNumber>
   fundsRaised: () => Promise<BigNumber>
   fundraiseType: () => Promise<number>
   investorCount: () => Promise<number>
@@ -41,10 +42,11 @@ export default class STO extends Contract {
   }
 
   async getDetails (): Promise<STODetails> {
-    const [startTime, endTime, cap, weiRaised, investorCount, tokensSold, isPolyFundraise] = await Promise.all([
+    const [startTime, endTime, cap, rate, weiRaised, investorCount, tokensSold, isPolyFundraise] = await Promise.all([
       this.startTime(),
       this.endTime(),
       this.cap(),
+      this.rate(),
       this.fundsRaised(),
       this.investorCount(),
       this.tokensSold(),
@@ -54,6 +56,7 @@ export default class STO extends Contract {
       start: this._toDate(startTime),
       end: this._toDate(endTime),
       cap: this._fromWei(cap),
+      rate: this.token.removeDecimals(rate),
       raised: this._fromWei(weiRaised),
       investorCount,
       tokensSold,
