@@ -141,7 +141,12 @@ export default class Contract {
     let receipt
     let txHash
 
-    const end = () => {
+    const sleep = () => {
+      return new Promise(resolve => setTimeout(resolve, 2000))
+    }
+
+    const end = async () => {
+      await sleep()
       Contract._params.txEndCallback(receipt)
       if (receipt.status === '0x0') {
         throw new Error('Transaction failed')
