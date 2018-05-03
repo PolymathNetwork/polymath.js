@@ -58,8 +58,8 @@ export default class STO extends Contract {
       cap: this._fromWei(cap),
       raised: this._fromWei(weiRaised),
       tokensSold: this.token.removeDecimals(tokensSold),
-      rate: rate.toNumber(),
-      investorCount: investorCount.toNumber(),
+      rate: rate,
+      investorCount: investorCount,
       isPolyFundraise,
     }
   }
