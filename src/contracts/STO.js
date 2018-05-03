@@ -16,13 +16,13 @@ export const FUNDRAISE_POLY = 1
 export default class STO extends Contract {
 
   wallet: () => Promise<Address>
-  startTime: () => Promise<number>
-  endTime: () => Promise<number>
+  startTime: () => Promise<BigNumber>
+  endTime: () => Promise<BigNumber>
   cap: () => Promise<BigNumber>
   rate: () => Promise<BigNumber>
   fundsRaised: () => Promise<BigNumber>
+  investorCount: () => Promise<BigNumber>
   fundraiseType: () => Promise<number>
-  investorCount: () => Promise<number>
 
   token: SecurityToken
 
@@ -56,10 +56,10 @@ export default class STO extends Contract {
       start: this._toDate(startTime),
       end: this._toDate(endTime),
       cap: this._fromWei(cap),
-      rate: this.token.removeDecimals(rate),
       raised: this._fromWei(weiRaised),
-      investorCount,
-      tokensSold,
+      tokensSold: this.token.removeDecimals(tokensSold),
+      rate: rate.toNumber(),
+      investorCount: investorCount.toNumber(),
       isPolyFundraise,
     }
   }

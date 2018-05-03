@@ -253,7 +253,7 @@ export default class Contract {
    * @returns {Date}
    * @protected
    */
-  _toDate (v: number): Date {
+  _toDate (v: BigNumber | number): Date {
     return new Date(v * 1000)
   }
 

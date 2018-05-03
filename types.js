@@ -112,10 +112,10 @@ export type STODetails = {|
   start: Date,
   end: Date,
   cap: BigNumber,
-  rate: BigNumber,
   raised: BigNumber,
-  investorCount: number,
   tokensSold: BigNumber,
+  rate: number,
+  investorCount: number,
   isPolyFundraise: boolean,
 |}
 
