@@ -156,7 +156,7 @@ export default class SecurityToken extends Contract {
       this._toUnixTS(start),
       this._toUnixTS(end),
       this._toWei(cap),
-      await this.addDecimals(rate),
+      rate,
       isEth ? FUNDRAISE_ETH : FUNDRAISE_POLY,
       PolyToken.address,
       fundsReceiver
