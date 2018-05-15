@@ -55,7 +55,7 @@ export default class STO extends Contract {
     return {
       start: this._toDate(startTime),
       end: this._toDate(endTime),
-      cap: this._fromWei(cap),
+      cap: new BigNumber(cap),
       raised: this._fromWei(weiRaised),
       tokensSold: this.token.removeDecimals(tokensSold),
       rate: rate,
