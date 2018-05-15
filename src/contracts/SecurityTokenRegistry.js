@@ -25,6 +25,7 @@ class SecurityTokenRegistry extends Contract {
       const contract = new SecurityTokenContract(token.address)
       token.contract = contract
       token.decimals = await contract.decimals()
+      token.details = await contract.tokenDetails()
     }
     return token
   }

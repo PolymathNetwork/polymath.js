@@ -92,6 +92,7 @@ export type SecurityToken = {|
 
   address?: Address,
   decimals?: number,
+  details?: string,
   contract?: SecurityTokenContract,
 |}
 

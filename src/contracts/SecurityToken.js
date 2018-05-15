@@ -19,7 +19,6 @@ const LOG_MODULE_ADDED = 'LogModuleAdded'
 export default class SecurityToken extends Contract {
 
   name: () => Promise<string>
-  tokenDetails: () => Promise<string> // IPFS hash
 
   _decimals: number
 
@@ -29,6 +28,10 @@ export default class SecurityToken extends Contract {
 
   async securityTokenVersion (): Promise<string> {
     return this._toAscii(await this._methods.securityTokenVersion().call())
+  }
+
+  async tokenDetails (): Promise<string> {
+    return this._toAscii(await this._methods.tokenDetails().call())
   }
 
   async decimals (): Promise<number> {
