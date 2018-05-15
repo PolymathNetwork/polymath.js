@@ -110,6 +110,7 @@ export type STOFactory = {|
 |}
 
 export type STODetails = {|
+  address: string,
   start: Date,
   end: Date,
   cap: BigNumber,

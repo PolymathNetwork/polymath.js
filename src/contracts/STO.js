@@ -53,6 +53,7 @@ export default class STO extends Contract {
       this.isPolyFundraise(),
     ])
     return {
+      address: this.address,
       start: this._toDate(startTime),
       end: this._toDate(endTime),
       cap: new BigNumber(cap),
