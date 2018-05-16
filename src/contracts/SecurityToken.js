@@ -125,7 +125,7 @@ export default class SecurityToken extends Contract {
     factory: Address,
     start: Date,
     end: Date,
-    cap: string,
+    cap: number,
     rate: number,
     isEth: boolean, // fundraise type, use true for ETH or false for POLY
     fundsReceiver: Address
@@ -158,7 +158,7 @@ export default class SecurityToken extends Contract {
     }, [
       this._toUnixTS(start),
       this._toUnixTS(end),
-      new BigNumber(cap),
+      this._toWei(cap),
       rate,
       isEth ? FUNDRAISE_ETH : FUNDRAISE_POLY,
       PolyToken.address,
