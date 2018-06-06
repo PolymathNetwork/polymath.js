@@ -24,19 +24,20 @@ class TickerRegistry extends Contract {
     })
   }
 
-  async getDetails (symbol: string): Promise<?SymbolDetails> {
-    let [owner, timestamp, name, ipfsHash, status] = this._toArray(await this._methods.getDetails(symbol).call())
+  async getDetails (symbol: string, txHash?: string): Promise<?SymbolDetails> {
+    let [owner, timestamp, name, swarmHash, status] = this._toArray(await this._methods.getDetails(symbol).call())
     if (this._isEmptyAddress(owner)) {
       return null
     }
 
-    // TODO @bshevchenko: _timestamp in LogRegisterTicker event of polymath-core@1.0.1 is not indexed, hence we can't...
-    // TODO @bshevchenko: ...filter by it. Fix this when it'll be indexed
-    let txHash
-    const events = await this._getRegisterTickerEvents()
-    for (let event of events) {
-      if (event.returnValues._timestamp === timestamp) {
-        txHash = event.transactionHash
+    if (!txHash) {
+      // TODO @bshevchenko: _timestamp in LogRegisterTicker event of polymath-core@1.1.0 is not indexed, hence we can't...
+      // TODO @bshevchenko: ...filter by it. Fix this when it'll be indexed
+      const events = await this._getRegisterTickerEvents()
+      for (let event of events) {
+        if (event.returnValues._timestamp === timestamp) {
+          txHash = event.transactionHash
+        }
       }
     }
 
@@ -49,12 +50,12 @@ class TickerRegistry extends Contract {
     return {
       ticker: symbol,
       owner,
-      timestamp,
       name,
       status,
       expires,
+      timestamp,
       txHash,
-      ...await IPFS.get(ipfsHash)
+      ...await IPFS.get(swarmHash)
     }
   }
 
@@ -62,7 +63,7 @@ class TickerRegistry extends Contract {
     const events = await this._getRegisterTickerEvents()
     const tokens = []
     for (let event of events) {
-      const details = await this.getDetails(event.returnValues._symbol)
+      const details = await this.getDetails(event.returnValues._symbol, event.transactionHash)
       if (details) {
         tokens.push(details)
       }
@@ -72,9 +73,9 @@ class TickerRegistry extends Contract {
 
   async registerTicker (details: SymbolDetails): Promise<Web3Receipt> {
     const ipfs: TickerIPFS = { }
-    const hash = await IPFS.put(ipfs)
+    const swarmHash = await IPFS.put(ipfs)
     return await this._tx(
-      this._methods.registerTicker(this.account, details.ticker, details.name, hash)
+      this._methods.registerTicker(this.account, details.ticker, details.name, swarmHash)
     )
   }
 }

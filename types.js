@@ -12,6 +12,7 @@ export type Web3 = {|
   eth: {
     clearSubscriptions: Function,
     getTransactionReceipt: Function,
+    getBlock: Function,
     abi: {
       encodeFunctionCall: Function
     },
@@ -84,14 +85,14 @@ export type SymbolDetails = {|
 export type SecurityToken = {|
   ticker: string,
   name: string,
-  timestamp: Date,
   status: boolean,
   owner: Address,
   expires: ?Date,
+  timestamp: Date,
   txHash: string, // ticker registration or token deployment (depends on status)
 
   address?: Address,
-  decimals?: number,
+  isDivisible?: boolean,
   details?: string,
   contract?: SecurityTokenContract,
 |}
@@ -132,6 +133,7 @@ export type Investor = {|
   address: Address,
   from: Date,
   to: Date,
+  expiry: Date,
   added?: Date,
   addedBy?: Address,
 |}

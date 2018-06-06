@@ -222,6 +222,16 @@ export default class Contract {
   }
 
   /**
+   * @param blockHashOrNumber
+   * @return {Date}
+   * @protected
+   */
+  async _getBlockDate (blockHashOrNumber: number | string): Promise<Date> {
+    const block = await Contract._params.web3.eth.getBlock(blockHashOrNumber)
+    return this._toDate(block.timestamp)
+  }
+
+  /**
    * @param v
    * @returns {string}
    * @protected

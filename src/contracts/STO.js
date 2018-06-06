@@ -1,6 +1,6 @@
 // @flow
 
-import artifact from 'polymath-core/build/contracts/CappedSTO.json' // TODO @bshevchenko: ISTO
+import artifact from 'polymath-core/build/contracts/CappedSTO.json'
 import BigNumber from 'bignumber.js'
 
 import Contract from './Contract'
@@ -16,13 +16,8 @@ export const FUNDRAISE_POLY = 1
 export default class STO extends Contract {
 
   wallet: () => Promise<Address>
-  startTime: () => Promise<BigNumber>
-  endTime: () => Promise<BigNumber>
-  cap: () => Promise<BigNumber>
-  rate: () => Promise<BigNumber>
-  fundsRaised: () => Promise<BigNumber>
-  investorCount: () => Promise<BigNumber>
   fundraiseType: () => Promise<number>
+  capReached: () => Promise<boolean>
 
   token: SecurityToken
 
@@ -42,25 +37,19 @@ export default class STO extends Contract {
   }
 
   async getDetails (): Promise<STODetails> {
-    const [startTime, endTime, cap, rate, weiRaised, investorCount, tokensSold, isPolyFundraise] = await Promise.all([
-      this.startTime(),
-      this.endTime(),
-      this.cap(),
-      this.rate(),
-      this.fundsRaised(),
-      this.investorCount(),
-      this.tokensSold(),
-      this.isPolyFundraise(),
-    ])
+
+    const [startTime, endTime, cap, rate, fundsRaised, investorCount, tokensSold, isPolyFundraise] =
+      await this._methods.getSTODetails().call()
+
     return {
       address: this.address,
       start: this._toDate(startTime),
       end: this._toDate(endTime),
       cap: this._fromWei(cap),
-      raised: this._fromWei(weiRaised),
+      raised: this._fromWei(fundsRaised),
       tokensSold: this.token.removeDecimals(tokensSold),
-      rate: rate,
-      investorCount: investorCount,
+      rate,
+      investorCount,
       isPolyFundraise,
     }
   }

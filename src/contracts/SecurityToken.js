@@ -18,9 +18,17 @@ const LOG_MODULE_ADDED = 'LogModuleAdded'
 
 export default class SecurityToken extends Contract {
 
-  name: () => Promise<string>
+  decimals: number = 18
 
-  _decimals: number
+  name: () => Promise<string>
+  tokenDetails: () => Promise<string>
+  freeze: () => Promise<boolean>
+  granularity: () => Promise<number | BigNumber>
+
+  setTokenBurner: (address: Address) => Promise<Web3Receipt>
+  freezeTransfers: () => Promise<Web3Receipt>
+  unfreezeTransfers: () => Promise<Web3Receipt>
+  updateTokenDetails: (newTokenDetails: string) => Promise<Web3Receipt>
 
   constructor (at: Address) {
     super(artifact, at)
@@ -30,31 +38,33 @@ export default class SecurityToken extends Contract {
     return this._toAscii(await this._methods.securityTokenVersion().call())
   }
 
-  async tokenDetails (): Promise<string> {
-    return this._toAscii(await this._methods.tokenDetails().call())
-  }
-
-  async decimals (): Promise<number> {
-    if (!this._decimals) {
-      this._decimals = await this._methods.decimals().call()
-    }
-    return this._decimals
-  }
-
   async addDecimals (n: number | BigNumber): Promise<BigNumber> {
-    return new BigNumber(10).toPower(
-      await this.decimals()
-    ).times(n)
+    return new BigNumber(10).toPower(this.decimals).times(n)
   }
 
   async removeDecimals (n: number | BigNumber): Promise<BigNumber> {
-    return new BigNumber(n).div(new BigNumber(10).toPower(
-      await this.decimals()
-    ))
+    return new BigNumber(n).div(new BigNumber(10).toPower(this.decimals))
   }
 
   async verifyTransfer (from: Address, to: Address, amount: BigNumber): Promise<boolean> {
     return this._methods.verifyTransfer(from, to, this.addDecimals(amount)).call()
+  }
+
+  async mint (investor: Address, amount: BigNumber): Promise<Web3Receipt> {
+    return this._tx(
+      this._methods.mint(
+        investor,
+        this.addDecimals(amount)
+      )
+    )
+  }
+
+  async burn (amount: BigNumber): Promise<Web3Receipt> {
+    return this._tx(
+      this._methods.burn(
+        this.addDecimals(amount)
+      )
+    )
   }
 
   /** @private */
@@ -150,9 +160,6 @@ export default class SecurityToken extends Contract {
         name: '_fundRaiseType'
       }, {
         type: 'address',
-        name: '_polyToken'
-      }, {
-        type: 'address',
         name: '_fundsReceiver'
       }]
     }, [
@@ -161,7 +168,6 @@ export default class SecurityToken extends Contract {
       this._toWei(cap),
       rate,
       isEth ? FUNDRAISE_ETH : FUNDRAISE_POLY,
-      PolyToken.address,
       fundsReceiver
     ])
     return this._tx(
