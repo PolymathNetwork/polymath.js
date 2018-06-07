@@ -39,7 +39,7 @@ export default class STO extends Contract {
   async getDetails (): Promise<STODetails> {
 
     const [startTime, endTime, cap, rate, fundsRaised, investorCount, tokensSold, isPolyFundraise] =
-      await this._methods.getSTODetails().call()
+      this._toArray(await this._methods.getSTODetails().call())
 
     return {
       address: this.address,

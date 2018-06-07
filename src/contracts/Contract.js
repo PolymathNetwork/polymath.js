@@ -142,7 +142,7 @@ export default class Contract {
     let txHash
 
     const sleep = () => {
-      return new Promise(resolve => setTimeout(resolve, 2000))
+      return new Promise(resolve => setTimeout(resolve, 2500))
     }
 
     const end = async () => {
