@@ -104,6 +104,10 @@ export default class Contract {
     throw new Error(`_isBoolOutput: no method with name "${name}" found`)
   }
 
+  isLocalhost (): boolean {
+    return Contract._params.id > 100000000
+  }
+
   /**
    * @param method
    * @param value ETH
@@ -146,7 +150,9 @@ export default class Contract {
     }
 
     const end = async () => {
-      await sleep()
+      if (!this.isLocalhost()) {
+        await sleep()
+      }
       Contract._params.txEndCallback(receipt)
       if (receipt.status === '0x0') {
         throw new Error('Transaction failed')
@@ -178,7 +184,7 @@ export default class Contract {
         })
       }
       if (e.message.includes('denied transaction signature')) {
-        throw new Error('Transaction was cancelled')
+        throw new Error('Transaction cancelled')
       }
     }
 
