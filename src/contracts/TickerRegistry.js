@@ -31,8 +31,8 @@ class TickerRegistry extends Contract {
     }
 
     if (!txHash) {
-      // TODO @bshevchenko: _timestamp in LogRegisterTicker event of polymath-core@1.1.0 is not indexed, hence we can't...
-      // TODO @bshevchenko: ...filter by it. Fix this when it'll be indexed
+      // TODO @bshevchenko: _timestamp in LogRegisterTicker event of polymath-core@1.1.0 is not indexed, hence we...
+      // TODO @bshevchenko: ...can't filter by it. Fix this when it'll be indexed
       const events = await this._getRegisterTickerEvents()
       for (let event of events) {
         if (event.returnValues._timestamp === timestamp) {
@@ -62,8 +62,24 @@ class TickerRegistry extends Contract {
   async getMyTokens (): Promise<Array<SymbolDetails>> {
     const events = await this._getRegisterTickerEvents()
     const tokens = []
+    const expiryLimit = await this.expiryLimit() * 1000
     for (let event of events) {
-      const details = await this.getDetails(event.returnValues._symbol, event.transactionHash)
+      const v = event.returnValues
+      const timestamp = this._toDate(v._timestamp)
+      const expires = new Date(timestamp.getTime() + expiryLimit)
+      const now = new Date()
+      if (now >= expires) {
+        continue
+      }
+      tokens.push({
+        ticker: v._symbol,
+        owner: v._owner,
+        name: v._name,
+        expires,
+        timestamp: v._timestamp,
+        txHash: event.transactionHash,
+      })
+      const details = await this.getDetails(v._symbol, event.transactionHash)
       if (details) {
         tokens.push(details)
       }
