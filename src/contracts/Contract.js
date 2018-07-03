@@ -37,6 +37,14 @@ export default class Contract {
     Contract._params = params
   }
 
+  static isMainnet (): boolean {
+    return Number(Contract._params.id) === 1
+  }
+
+  static isLocalhost (): boolean {
+    return Contract._params.id > 100000000
+  }
+
   get account (): Address {
     return Contract._params.account
   }
@@ -104,10 +112,6 @@ export default class Contract {
     throw new Error(`_isBoolOutput: no method with name "${name}" found`)
   }
 
-  isLocalhost (): boolean {
-    return Contract._params.id > 100000000
-  }
-
   /**
    * @param method
    * @param value ETH
@@ -150,7 +154,7 @@ export default class Contract {
     }
 
     const end = async () => {
-      if (!this.isLocalhost()) {
+      if (!Contract.isLocalhost()) {
         await sleep()
       }
       Contract._params.txEndCallback(receipt)

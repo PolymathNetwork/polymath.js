@@ -6,8 +6,9 @@ import BigNumber from 'bignumber.js'
 import Contract from './Contract'
 import PermissionManager from './PermissionManager'
 import TransferManager from './TransferManager'
+import { PolyToken, CappedSTOFactory } from '../'
 import STO, { FUNDRAISE_ETH, FUNDRAISE_POLY } from './STO'
-import { PolyToken } from '../'
+
 import type { Address, Web3Receipt } from '../../types'
 
 const MODULE_PERMISSION_MANAGER = 1
@@ -38,12 +39,16 @@ export default class SecurityToken extends Contract {
     return this._toAscii(await this._methods.securityTokenVersion().call())
   }
 
-  async addDecimals (n: number | BigNumber): Promise<BigNumber> {
+  addDecimals (n: number | BigNumber): Promise<BigNumber> {
     return new BigNumber(10).toPower(this.decimals).times(n)
   }
 
-  async removeDecimals (n: number | BigNumber): Promise<BigNumber> {
+  removeDecimals (n: number | BigNumber): Promise<BigNumber> {
     return new BigNumber(n).div(new BigNumber(10).toPower(this.decimals))
+  }
+
+  async isDivisible (): Promise<boolean> {
+    return Number(await this.granularity()) === 1
   }
 
   async verifyTransfer (from: Address, to: Address, amount: BigNumber): Promise<boolean> {
@@ -131,8 +136,17 @@ export default class SecurityToken extends Contract {
     )
   }
 
-  async setSTO (
-    factory: Address,
+  async mintMulti (addresses: Array<Address>, amounts: Array<number | BigNumber>): Promise<Web3Receipt> {
+    const amountsFinal = []
+    for (let amount of amounts) {
+      amountsFinal.push(this.addDecimals(amount))
+    }
+    return this._tx(
+      this._methods.mintMulti(addresses, amountsFinal),
+    )
+  }
+
+  async setCappedSTO (
     start: Date,
     end: Date,
     cap: number,
@@ -140,6 +154,8 @@ export default class SecurityToken extends Contract {
     isEth: boolean, // fundraise type, use true for ETH or false for POLY
     fundsReceiver: Address
   ): Promise<Web3Receipt> {
+    const setupCost = await CappedSTOFactory.setupCost()
+    await PolyToken.transfer(this.address, setupCost)
     const data = Contract._params.web3.eth.abi.encodeFunctionCall({
       name: 'configure', // TODO @bshevchenko: can we grab this ABI from the artifact?
       type: 'function',
@@ -172,9 +188,9 @@ export default class SecurityToken extends Contract {
     ])
     return this._tx(
       this._methods.addModule(
-        factory,
+        CappedSTOFactory.address,
         data,
-        0,
+        PolyToken.addDecimals(setupCost),
         0,
         false
       ),

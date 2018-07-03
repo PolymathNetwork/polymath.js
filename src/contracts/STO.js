@@ -4,8 +4,7 @@ import artifact from 'polymath-core/build/contracts/CappedSTO.json'
 import BigNumber from 'bignumber.js'
 
 import Contract from './Contract'
-import SecurityToken from './SecurityToken'
-import { PolyToken } from '../index'
+import { PolyToken, SecurityToken } from '../index'
 import type { Address, STODetails, STOPurchase, Web3Receipt } from '../../types'
 
 const LOG_TOKEN_PURCHASE = 'TokenPurchase'
@@ -18,6 +17,9 @@ export default class STO extends Contract {
   wallet: () => Promise<Address>
   fundraiseType: () => Promise<number>
   capReached: () => Promise<boolean>
+  paused: () => Promise<boolean>
+
+  pause: () => Promise<Web3Receipt>
 
   token: SecurityToken
 
@@ -75,20 +77,6 @@ export default class STO extends Contract {
     return result
   }
 
-  async isPolyPreAuth (value: BigNumber): Promise<boolean> {
-    try {
-      const allowance = await PolyToken.allowance(this.account, this.address)
-      const currBalance = await PolyToken.myBalance()
-      return allowance.gte(value) && currBalance.gte(value)
-    } catch (e) {
-      return false
-    }
-  }
-
-  async preAuthPoly (value: BigNumber): Promise<Web3Receipt> {
-    return PolyToken.approve(this.address, value)
-  }
-
   async buy (value: BigNumber): Promise<Web3Receipt> {
     if (this.isPolyFundraise()) {
       return this._tx(
@@ -100,6 +88,12 @@ export default class STO extends Contract {
     return this._tx(
       this._methods.buyTokens(this.account),
       value
+    )
+  }
+
+  async unpause (newEndDate: Date): Promise<Web3Receipt> {
+    return this._tx(
+      this._methods.unpause(this._toUnixTS(newEndDate)),
     )
   }
 }

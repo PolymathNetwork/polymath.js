@@ -1,8 +1,10 @@
 // @flow
 
+import BigNumber from 'bignumber.js'
 import artifact from 'polymath-core/build/contracts/TickerRegistry.json'
 
 import Contract from './Contract'
+import PolyToken from './PolyToken'
 import IPFS from '../IPFS'
 
 import type { SymbolDetails, Web3Event, Web3Receipt } from '../../types'
@@ -15,6 +17,14 @@ type TickerIPFS = {
 class TickerRegistry extends Contract {
 
   expiryLimit: () => Promise<number>
+
+  async expiryLimitInDays (): Promise<number> {
+    return Math.round((await this.expiryLimit()) / 24 / 60 / 60)
+  }
+
+  async registrationFee (): Promise<BigNumber> {
+    return PolyToken.removeDecimals(await this._methods.registrationFee().call())
+  }
 
   async _getRegisterTickerEvents (): Promise<Array<Web3Event>> {
     return await this._contractWS.getPastEvents(LOG_REGISTER_TICKER, {
@@ -89,9 +99,15 @@ class TickerRegistry extends Contract {
 
   async registerTicker (details: SymbolDetails): Promise<Web3Receipt> {
     const ipfs: TickerIPFS = { }
-    const swarmHash = await IPFS.put(ipfs)
+    const [fee, swarmHash] = await Promise.all([
+      this.registrationFee(),
+      IPFS.put(ipfs),
+    ])
+    await PolyToken.approve(this.address, fee)
     return await this._tx(
-      this._methods.registerTicker(this.account, details.ticker, details.name, swarmHash)
+      this._methods.registerTicker(this.account, details.ticker, details.name, swarmHash),
+      null,
+      1.15,
     )
   }
 }
