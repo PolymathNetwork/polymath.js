@@ -18,34 +18,37 @@ export default class TransferManager extends Contract {
     super(artifact, at)
   }
 
-  async modifyWhitelist (investor: Investor): Promise<Web3Receipt> {
+  async modifyWhitelist (investor: Investor, canBuyFromSTO: boolean = true): Promise<Web3Receipt> {
     return this._tx(
       this._methods.modifyWhitelist(
         investor.address,
         this._toUnixTS(investor.from),
         this._toUnixTS(investor.to),
         this._toUnixTS(investor.expiry),
+        canBuyFromSTO,
       ),
       null,
       2
     )
   }
 
-  async modifyWhitelistMulti (investors: Array<Investor>): Promise<Web3Receipt> {
+  async modifyWhitelistMulti (investors: Array<Investor>, canBuyFromSTO: boolean = true): Promise<Web3Receipt> {
     const addresses: Array<string> = []
     const fromTimes: Array<number> = []
     const toTimes: Array<number> = []
     const expiryTimes: Array<number> = []
+    const canBuyFromSTOArr: Array<boolean> = []
 
     for (let investor of investors) {
       addresses.push(investor.address)
       fromTimes.push(this._toUnixTS(investor.from))
       toTimes.push(this._toUnixTS(investor.to))
       expiryTimes.push(this._toUnixTS(investor.expiry))
+      canBuyFromSTOArr.push(canBuyFromSTO)
     }
 
     return this._tx(
-      this._methods.modifyWhitelistMulti(addresses, fromTimes, toTimes, expiryTimes),
+      this._methods.modifyWhitelistMulti(addresses, fromTimes, toTimes, expiryTimes, canBuyFromSTOArr),
       null,
       2
     )

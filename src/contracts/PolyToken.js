@@ -1,14 +1,16 @@
 // @flow
 
+// TODO @bshevchenko: Add PolyToken support on Mainnet #16
 import artifact from 'polymath-core/build/contracts/PolyTokenFaucet.json'
 import BigNumber from 'bignumber.js'
 
 import Contract from './Contract'
-import type { Address, Web3Event } from '../../types'
+import type { Address, Web3Event, Web3Receipt } from '../../types'
 
-const TRANSFER = 'Transfer'
+export const TRANSFER = 'Transfer'
+export const APPROVAL = 'Approval'
 
-class PolyToken extends Contract {
+export class PolyToken extends Contract {
 
   decimals: number = 18
   symbol: string = 'POLY'
@@ -36,6 +38,13 @@ class PolyToken extends Contract {
     return this.removeDecimals(
       await this._methods.allowance(owner, spender).call(),
     )
+  }
+
+  async getTokens (amount: number | BigNumber): Promise<Web3Receipt> {
+    if (Contract.isMainnet()) {
+      throw new Error('POLY faucet is not available on mainnet')
+    }
+    return this._tx(this._methods.getTokens(this.addDecimals(amount), this.account))
   }
 
   async transfer (to: Address, amount: BigNumber) {
