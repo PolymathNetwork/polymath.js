@@ -5,6 +5,9 @@ import artifact from 'polymath-core/build/contracts/GeneralTransferManager.json'
 import Contract from './Contract'
 import type { Address, Investor, Web3Receipt } from '../../types'
 
+export const PAUSE = 'Pause'
+export const UNPAUSE = 'Unpause'
+
 const LOG_MODIFY_WHITELIST = 'LogModifyWhitelist'
 
 export default class TransferManager extends Contract {
@@ -72,5 +75,18 @@ export default class TransferManager extends Contract {
       })
     }
     return result
+  }
+
+  async subscribePauseEvents (callback: (values: any) => void) {
+    const callbackInternalPause = (event: Web3Event) => {
+      callback({event: 'pause', values: event.returnValues})
+    }
+    const callbackInternalUnpause = (event: Web3Event) => {
+      callback({event: 'unpause', values: event.returnValues})
+    }
+    return Promise.all([
+      this.subscribe(PAUSE, {}, callbackInternalPause),
+      this.subscribe(UNPAUSE, {}, callbackInternalUnpause)
+    ])
   }
 }
