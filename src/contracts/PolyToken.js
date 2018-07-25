@@ -75,8 +75,8 @@ export class PolyToken extends Contract {
       callback(isSent ? values._to : values._from, value, isSent)
     }
     return Promise.all([
-      this.subscribe(TRANSFER, { from: this.account }, callbackInternal),
-      this.subscribe(TRANSFER, { to: this.account }, callbackInternal)
+      this.subscribe(TRANSFER, { _from: this.account }, callbackInternal),
+      this.subscribe(TRANSFER, { _to: this.account }, callbackInternal)
     ])
   }
 }
