@@ -72,9 +72,13 @@ export default class SecurityToken extends Contract {
   }
 
   async getModuleByName (type: number, name: string): Promise<Address> {
-    return this._toArray(
-      await this._methods.getModuleByName(type, this._toBytes(name))
+    const address = this._toArray(
+      await this._methods.getModuleByName(type, this._toBytes(name)).call()
     )[1]
+    if (this._isEmptyAddress(address)) {
+      throw new Error('module not found')
+    }
+    return address
   }
 
   async getPermissionManager (): Promise<?PermissionManager> {
@@ -200,8 +204,7 @@ export default class SecurityToken extends Contract {
         CappedSTOFactory.address,
         data,
         PolyToken.addDecimals(setupCost),
-        0,
-        false
+        0
       ),
       null,
       1.05,
@@ -225,8 +228,7 @@ export default class SecurityToken extends Contract {
         PercentageTransferManagerFactory.address,
         data,
         PolyToken.addDecimals(setupCost),
-        0,
-        false
+        0
       )
     )
   }

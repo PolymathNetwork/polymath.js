@@ -72,7 +72,7 @@ export class PolyToken extends Contract {
       const values = event.returnValues
       const value = new BigNumber(values._value)
       const isSent = values._from === this.account
-      callback(isSent ? values._to : values._from, value, isSent)
+      callback(isSent ? values._to : values._from, this.removeDecimals(value), isSent)
     }
     return Promise.all([
       this.subscribe(TRANSFER, { _from: this.account }, callbackInternal),
