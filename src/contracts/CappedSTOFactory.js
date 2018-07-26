@@ -1,16 +1,10 @@
 // @flow
 
-import BigNumber from 'bignumber.js'
 import artifact from 'polymath-core/build/contracts/CappedSTOFactory.json'
 
-import Contract from './Contract'
-import { PolyToken } from '../'
+import IModuleFactory from './IModuleFactory'
 
-class CappedSTOFactory extends Contract {
-
-  async setupCost (): Promise<BigNumber> {
-    return PolyToken.removeDecimals(await this._methods.setupCost().call())
-  }
+class CappedSTOFactory extends IModuleFactory {
 }
 
 export default new CappedSTOFactory(artifact)

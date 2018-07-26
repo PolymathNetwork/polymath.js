@@ -21,9 +21,9 @@ export default class TransferManager extends Contract {
   async modifyWhitelist (investor: Investor, canBuyFromSTO: boolean = true): Promise<Web3Receipt> {
     return this._tx(
       this._methods.modifyWhitelist(
-        investor.address,
-        this._toUnixTS(investor.from),
-        this._toUnixTS(investor.to),
+        investor.address, // $FlowFixMe
+        this._toUnixTS(investor.from), // $FlowFixMe
+        this._toUnixTS(investor.to), // $FlowFixMe
         this._toUnixTS(investor.expiry),
         canBuyFromSTO,
       ),
@@ -40,9 +40,9 @@ export default class TransferManager extends Contract {
     const canBuyFromSTOArr: Array<boolean> = []
 
     for (let investor of investors) {
-      addresses.push(investor.address)
-      fromTimes.push(this._toUnixTS(investor.from))
-      toTimes.push(this._toUnixTS(investor.to))
+      addresses.push(investor.address) // $FlowFixMe
+      fromTimes.push(this._toUnixTS(investor.from)) // $FlowFixMe
+      toTimes.push(this._toUnixTS(investor.to)) // $FlowFixMe
       expiryTimes.push(this._toUnixTS(investor.expiry))
       canBuyFromSTOArr.push(canBuyFromSTO)
     }
@@ -55,14 +55,14 @@ export default class TransferManager extends Contract {
   }
 
   async getWhitelist (): Promise<Array<Investor>> {
-    const result = []
+    const logs = []
     const events = await this._contractWS.getPastEvents(LOG_MODIFY_WHITELIST, {
       fromBlock: 0,
       toBlock: 'latest'
     })
 
     for (let event of events) {
-      result.push({
+      logs.push({
         address: event.returnValues._investor,
         addedBy: event.returnValues._addedBy,
         added: this._toDate(event.returnValues._dateAdded),
@@ -71,6 +71,30 @@ export default class TransferManager extends Contract {
         expiry: this._toDate(event.returnValues._expiryTime),
       })
     }
-    return result
+
+    const investors = []
+    for (let i = 0; i < logs.length; i++) {
+      const found = investors.some((el, index, array) => {
+        if (el.address === logs[i].address) { // $FlowFixMe
+          if (logs[i].added > el.added) {
+            array[index] = logs[i]
+            return true
+          }
+          return true
+        }
+        return false
+      })
+      if (!found) {
+        investors.push(logs[i])
+      }
+    }
+    const removeZeroTimestampArray = []
+    for (let j = 0; j < investors.length; j++) { // $FlowFixMe
+      if (investors[j].from.getTime() !== 0 && investors[j].to.getTime() !== 0) {
+        removeZeroTimestampArray.push(investors[j])
+      }
+    }
+
+    return removeZeroTimestampArray
   }
 }

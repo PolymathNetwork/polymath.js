@@ -8,13 +8,15 @@ export default class Contract {
 
   static _params: NetworkParams
   _artifact: Artifact
+  _artifactTestnet: ?Artifact
   _contract: Web3Contract
   _contractWS: Web3Contract
   _methods: Object
   address: Address
 
-  constructor (artifact: Artifact, at?: Address) {
+  constructor (artifact: Artifact, at?: Address, artifactTestnet?: Artifact) {
     this._artifact = artifact
+    this._artifactTestnet = artifactTestnet
     return new Proxy(this, {
       get: (target: Object, field: string): Promise<Web3Receipt> | any => {
         target._init(at)
@@ -59,6 +61,9 @@ export default class Contract {
 
   /** @private */
   _init (at?: Address) {
+    if (!Contract.isMainnet() && this._artifactTestnet) {
+      this._artifact = this._artifactTestnet
+    }
     try {
       const address = at || this._artifact.networks[Contract._params.id].address
       if (this._contract && this.address === address) {

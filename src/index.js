@@ -6,5 +6,6 @@ export { default as STO } from './contracts/STO'
 export { default as TransferManager } from './contracts/TransferManager'
 export { default as PermissionManager } from './contracts/PermissionManager'
 export { default as CappedSTOFactory } from './contracts/CappedSTOFactory'
+export { default as PercentageTransferManagerFactory } from './contracts/PercentageTransferManagerFactory'
 
 export default from './contracts/Contract'

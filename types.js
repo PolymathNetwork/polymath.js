@@ -131,9 +131,10 @@ export type STOPurchase = {|
 
 export type Investor = {|
   address: Address,
-  from: Date,
-  to: Date,
-  expiry: Date,
+  from?: Date,
+  to?: Date,
+  expiry?: Date,
   added?: Date,
   addedBy?: Address,
+  isPercentage?: boolean,
 |}

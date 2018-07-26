@@ -1,7 +1,7 @@
 // @flow
 
-// TODO @bshevchenko: Add PolyToken support on Mainnet #16
-import artifact from 'polymath-core/build/contracts/PolyTokenFaucet.json'
+import artifact from 'polymath-core/build/contracts/PolyToken.json'
+import artifactTestnet from 'polymath-core/build/contracts/PolyTokenFaucet.json'
 import BigNumber from 'bignumber.js'
 
 import Contract from './Contract'
@@ -81,4 +81,4 @@ export class PolyToken extends Contract {
   }
 }
 
-export default new PolyToken(artifact)
+export default new PolyToken(artifact, undefined, artifactTestnet)

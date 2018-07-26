@@ -6,16 +6,15 @@ import BigNumber from 'bignumber.js'
 import Contract from './Contract'
 import PermissionManager from './PermissionManager'
 import TransferManager from './TransferManager'
-import { PolyToken, CappedSTOFactory } from '../'
+import { PolyToken, CappedSTOFactory, PercentageTransferManagerFactory } from '../'
 import STO, { FUNDRAISE_ETH, FUNDRAISE_POLY } from './STO'
 
 import type { Address, Web3Receipt } from '../../types'
+import PercentageTransferManager from './PercentageTransferManager'
 
 const MODULE_PERMISSION_MANAGER = 1
 const MODULE_TRANSFER_MANAGER = 2
 const MODULE_STO = 3
-
-const LOG_MODULE_ADDED = 'LogModuleAdded'
 
 export default class SecurityToken extends Contract {
 
@@ -72,22 +71,17 @@ export default class SecurityToken extends Contract {
     )
   }
 
-  /** @private */
-  async _getModule (_type: number): Promise<Address> {
-    const events = await this._contractWS.getPastEvents(LOG_MODULE_ADDED, {
-      filter: { _type },
-      fromBlock: 0,
-      toBlock: 'latest'
-    })
-    if (events.length) {
-      return events[0].returnValues._module
-    }
-    throw new Error('module is not installed')
+  async getModuleByName (type: number, name: string): Promise<Address> {
+    return this._toArray(
+      await this._methods.getModuleByName(type, this._toBytes(name))
+    )[1]
   }
 
   async getPermissionManager (): Promise<?PermissionManager> {
     try {
-      return new PermissionManager(await this._getModule(MODULE_PERMISSION_MANAGER))
+      return new PermissionManager(
+        await this.getModuleByName(MODULE_PERMISSION_MANAGER, 'GeneralPermissionManager')
+      )
     } catch (e) {
       return null
     }
@@ -95,7 +89,19 @@ export default class SecurityToken extends Contract {
 
   async getTransferManager (): Promise<?TransferManager> {
     try {
-      return new TransferManager(await this._getModule(MODULE_TRANSFER_MANAGER))
+      return new TransferManager(
+        await this.getModuleByName(MODULE_TRANSFER_MANAGER, 'GeneralTransferManager')
+      )
+    } catch (e) {
+      return null
+    }
+  }
+
+  async getPercentageTM (): Promise<?TransferManager> {
+    try {
+      return new TransferManager(
+        await this.getModuleByName(MODULE_TRANSFER_MANAGER, 'PercentageTransferManager')
+      )
     } catch (e) {
       return null
     }
@@ -103,7 +109,10 @@ export default class SecurityToken extends Contract {
 
   async getSTO (): Promise<?STO> {
     try {
-      return new STO(await this._getModule(MODULE_STO), this)
+      return new STO(
+        await this.getModuleByName(MODULE_STO, 'CappedSTO'),
+        this
+      )
     } catch (e) {
       return null
     }
@@ -196,6 +205,29 @@ export default class SecurityToken extends Contract {
       ),
       null,
       1.05,
+    )
+  }
+
+  async setPercentageTM (percentage: number): Promise<Web3Receipt> {
+    const setupCost = await PercentageTransferManagerFactory.setupCost()
+    const data = Contract._params.web3.eth.abi.encodeFunctionCall({
+      name: 'configure',
+      type: 'function',
+      inputs: [{
+        type: 'uint256',
+        name: '_maxHolderPercentage'
+      }]
+    }, [
+      PercentageTransferManager.addDecimals(percentage)
+    ])
+    return this._tx(
+      this._methods.addModule(
+        PercentageTransferManagerFactory.address,
+        data,
+        PolyToken.addDecimals(setupCost),
+        0,
+        false
+      )
     )
   }
 }
