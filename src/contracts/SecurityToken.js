@@ -6,11 +6,10 @@ import BigNumber from 'bignumber.js'
 import Contract from './Contract'
 import PermissionManager from './PermissionManager'
 import TransferManager from './TransferManager'
+import PercentageTransferManager from './PercentageTransferManager'
 import { PolyToken, CappedSTOFactory, PercentageTransferManagerFactory } from '../'
 import STO, { FUNDRAISE_ETH, FUNDRAISE_POLY } from './STO'
-
 import type { Address, Web3Receipt } from '../../types'
-import PercentageTransferManager from './PercentageTransferManager'
 
 const MODULE_PERMISSION_MANAGER = 1
 const MODULE_TRANSFER_MANAGER = 2
@@ -102,8 +101,8 @@ export default class SecurityToken extends Contract {
   }
 
   async getPercentageTM (): Promise<?TransferManager> {
-    try {
-      return new TransferManager(
+    try { // $FlowFixMe
+      return new PercentageTransferManager(
         await this.getModuleByName(MODULE_TRANSFER_MANAGER, 'PercentageTransferManager')
       )
     } catch (e) {

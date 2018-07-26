@@ -31,6 +31,10 @@ export default class PercentageTransferManager extends Contract {
     return new BigNumber(n).div(new BigNumber(10).toPower(16))
   }
 
+  async maxHolderPercentage (): Promise<number> {
+    return PercentageTransferManager.removeDecimals(await this._methods.maxHolderPercentage().call())
+  }
+
   async changeHolderPercentage (percentage: number): Promise<Web3Receipt> {
     return this._tx(
       this._methods.changeHolderPercentage(
@@ -44,7 +48,9 @@ export default class PercentageTransferManager extends Contract {
       this._methods.modifyWhitelist(
         investor.address,
         investor.isPercentage,
-      )
+      ),
+      null,
+      2
     )
   }
 
@@ -54,12 +60,14 @@ export default class PercentageTransferManager extends Contract {
     const valids: Array<boolean> = []
 
     for (let investor of investors) {
-      addresses.push(investor.address)
-      valids.push()
+      addresses.push(investor.address) // $FlowFixMe
+      valids.push(investor.isPercentage)
     }
 
     return this._tx(
-      this._methods.modifyWhitelistMulti(addresses, valids)
+      this._methods.modifyWhitelistMulti(addresses, valids),
+      null,
+      2
     )
   }
 
