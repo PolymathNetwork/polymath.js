@@ -8,5 +8,7 @@ export { default as PermissionManager } from './contracts/PermissionManager'
 export { default as CappedSTOFactory } from './contracts/CappedSTOFactory'
 export { default as PercentageTransferManagerFactory } from './contracts/PercentageTransferManagerFactory'
 export { default as PercentageTransferManager } from './contracts/PercentageTransferManager'
+export { default as CountTransferManagerFactory } from './contracts/CountTransferManagerFactory'
+export { default as CountTransferManager } from './contracts/CountTransferManager'
 
 export default from './contracts/Contract'

@@ -7,7 +7,8 @@ import Contract from './Contract'
 import PermissionManager from './PermissionManager'
 import TransferManager from './TransferManager'
 import PercentageTransferManager from './PercentageTransferManager'
-import { PolyToken, CappedSTOFactory, PercentageTransferManagerFactory } from '../'
+import CountTransferManager from './CountTransferManager'
+import { PolyToken, CappedSTOFactory, PercentageTransferManagerFactory, CountTransferManagerFactory } from '../'
 import STO, { FUNDRAISE_ETH, FUNDRAISE_POLY } from './STO'
 import type { Address, Web3Receipt } from '../../types'
 
@@ -100,10 +101,20 @@ export default class SecurityToken extends Contract {
     }
   }
 
-  async getPercentageTM (): Promise<?TransferManager> {
+  async getPercentageTM (): Promise<?PercentageTransferManager> {
     try { // $FlowFixMe
       return new PercentageTransferManager(
         await this.getModuleByName(MODULE_TRANSFER_MANAGER, 'PercentageTransferManager')
+      )
+    } catch (e) {
+      return null
+    }
+  }
+
+  async getCountTM (): Promise<?CountTransferManager> {
+    try { // $FlowFixMe
+      return new CountTransferManager(
+        await this.getModuleByName(MODULE_TRANSFER_MANAGER, 'CountTransferManager')
       )
     } catch (e) {
       return null
@@ -225,6 +236,28 @@ export default class SecurityToken extends Contract {
     return this._tx(
       this._methods.addModule(
         PercentageTransferManagerFactory.address,
+        data,
+        PolyToken.addDecimals(setupCost),
+        0
+      )
+    )
+  }
+
+  async setCountTM (count: number): Promise<Web3Receipt> {
+    const setupCost = await CountTransferManagerFactory.setupCost()
+    const data = Contract._params.web3.eth.abi.encodeFunctionCall({
+      name: 'configure',
+      type: 'function',
+      inputs: [{
+        type: 'uint256',
+        name: '_maxHolderCount'
+      }]
+    }, [
+      count
+    ])
+    return this._tx(
+      this._methods.addModule(
+        CountTransferManagerFactory.address,
         data,
         PolyToken.addDecimals(setupCost),
         0
