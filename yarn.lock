@@ -4791,9 +4791,9 @@ pluralize@^7.0.0:
   version "7.0.0"
   resolved "https://registry.yarnpkg.com/pluralize/-/pluralize-7.0.0.tgz#298b89df8b93b0221dbf421ad2b1b1ea23fc6777"
 
-polymath-core@1.3.2:
-  version "1.3.2"
-  resolved "https://registry.yarnpkg.com/polymath-core/-/polymath-core-1.3.2.tgz#b30b355f94afe1b40d9eceefbda154ef7766608b"
+polymath-core@1.3.3:
+  version "1.3.3"
+  resolved "https://registry.yarnpkg.com/polymath-core/-/polymath-core-1.3.3.tgz#7a6f45f661dfc49dd930ece1aa5eea65c0760fcd"
   dependencies:
     babel-polyfill "6.26.0"
     babel-preset-es2015 "6.24.1"
