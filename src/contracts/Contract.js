@@ -137,7 +137,8 @@ export default class Contract {
     }
     const params = {
       ...preParams,
-      gas
+      gas,
+      gasPrice: 5000000000,
     }
 
     // dry run
