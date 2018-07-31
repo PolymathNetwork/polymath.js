@@ -18,37 +18,37 @@ export default class TransferManager extends Contract {
     super(artifact, at)
   }
 
-  async modifyWhitelist (investor: Investor, canBuyFromSTO: boolean = true): Promise<Web3Receipt> {
+  async modifyWhitelist (investor: Investor): Promise<Web3Receipt> {
     return this._tx(
       this._methods.modifyWhitelist(
         investor.address, // $FlowFixMe
         this._toUnixTS(investor.from), // $FlowFixMe
         this._toUnixTS(investor.to), // $FlowFixMe
         this._toUnixTS(investor.expiry),
-        canBuyFromSTO,
+        investor.canBuyFromSTO,
       ),
       null,
       2
     )
   }
 
-  async modifyWhitelistMulti (investors: Array<Investor>, canBuyFromSTO: boolean = true): Promise<Web3Receipt> {
+  async modifyWhitelistMulti (investors: Array<Investor>): Promise<Web3Receipt> {
     const addresses: Array<string> = []
     const fromTimes: Array<number> = []
     const toTimes: Array<number> = []
     const expiryTimes: Array<number> = []
-    const canBuyFromSTOArr: Array<boolean> = []
+    const canBuyFromSTO: Array<boolean> = []
 
     for (let investor of investors) {
       addresses.push(investor.address) // $FlowFixMe
       fromTimes.push(this._toUnixTS(investor.from)) // $FlowFixMe
       toTimes.push(this._toUnixTS(investor.to)) // $FlowFixMe
-      expiryTimes.push(this._toUnixTS(investor.expiry))
-      canBuyFromSTOArr.push(canBuyFromSTO)
+      expiryTimes.push(this._toUnixTS(investor.expiry)) // $FlowFixMe
+      canBuyFromSTO.push(investor.canBuyFromSTO)
     }
 
     return this._tx(
-      this._methods.modifyWhitelistMulti(addresses, fromTimes, toTimes, expiryTimes, canBuyFromSTOArr),
+      this._methods.modifyWhitelistMulti(addresses, fromTimes, toTimes, expiryTimes, canBuyFromSTO),
       null,
       2
     )
@@ -69,6 +69,7 @@ export default class TransferManager extends Contract {
         from: this._toDate(event.returnValues._fromTime),
         to: this._toDate(event.returnValues._toTime),
         expiry: this._toDate(event.returnValues._expiryTime),
+        canBuyFromSTO: event.returnValues._canBuyFromSTO,
       })
     }
 

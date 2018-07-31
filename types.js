@@ -136,5 +136,6 @@ export type Investor = {|
   expiry?: Date,
   added?: Date,
   addedBy?: Address,
+  canBuyFromSTO?: boolean,
   isPercentage?: boolean,
 |}
