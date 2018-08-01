@@ -36,6 +36,7 @@ class SecurityTokenRegistry extends Contract {
       token.contract = contract
       token.details = await contract.tokenDetails()
       token.isDivisible = await contract.isDivisible()
+      token.owner = await contract.owner()
 
       // get token issuing tx hash
       const events = await this._contractWS.getPastEvents(LOG_REGISTER_TICKER, {

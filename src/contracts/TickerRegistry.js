@@ -69,6 +69,10 @@ class TickerRegistry extends Contract {
     }
   }
 
+  /**
+   * TODO @bshevchenko: DEPRECATED since owner can be changed
+   * @deprecated
+   */
   async getMyTokens (): Promise<Array<SymbolDetails>> {
     const events = await this._getRegisterTickerEvents()
     const tokens = []

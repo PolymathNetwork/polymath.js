@@ -22,6 +22,7 @@ export default class SecurityToken extends Contract {
 
   decimals: number = 18
 
+  owner: () => Promise<Address>
   name: () => Promise<string>
   tokenDetails: () => Promise<string>
   freeze: () => Promise<boolean>
