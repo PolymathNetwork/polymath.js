@@ -54,9 +54,10 @@ export default class TransferManager extends Contract {
     )
   }
 
-  async getWhitelist (): Promise<Array<Investor>> {
+  async getWhitelist (cannotBuyFromSTO?: boolean): Promise<Array<Investor>> {
     const logs = []
     const events = await this._contractWS.getPastEvents(LOG_MODIFY_WHITELIST, {
+      filter: cannotBuyFromSTO ? { _canBuyFromSTO: false } : {},
       fromBlock: 0,
       toBlock: 'latest'
     })

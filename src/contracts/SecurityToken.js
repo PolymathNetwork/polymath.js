@@ -10,11 +10,13 @@ import PercentageTransferManager from './PercentageTransferManager'
 import CountTransferManager from './CountTransferManager'
 import { PolyToken, CappedSTOFactory, PercentageTransferManagerFactory, CountTransferManagerFactory } from '../'
 import STO, { FUNDRAISE_ETH, FUNDRAISE_POLY } from './STO'
-import type { Address, Web3Receipt } from '../../types'
+import type { Address, Web3Receipt, Investor } from '../../types'
 
 const MODULE_PERMISSION_MANAGER = 1
 const MODULE_TRANSFER_MANAGER = 2
 const MODULE_STO = 3
+
+const LOG_MINTED = 'Minted'
 
 export default class SecurityToken extends Contract {
 
@@ -167,6 +169,39 @@ export default class SecurityToken extends Contract {
     return this._tx(
       this._methods.mintMulti(addresses, amountsFinal),
     )
+  }
+
+  async getMinted (): Promise<Array<Investor>> { // $FlowFixMe
+    const tm = await this.getTransferManager()
+    const investors = await tm.getWhitelist(true)
+
+    const events = await this._contractWS.getPastEvents(LOG_MINTED, {
+      fromBlock: 0,
+      toBlock: 'latest'
+    })
+
+    for (let event of events) {
+      const amount = this.removeDecimals(event.returnValues.amount)
+      for (let i = 0; i < investors.length; i++) {
+        if (event.returnValues.to === investors[i].address) {
+          if (investors[i].minted) {
+            investors[i].minted = investors[i].minted.plus(amount)
+          } else {
+            investors[i].minted = new BigNumber(amount)
+          }
+          break
+        }
+      }
+    }
+
+    const result = []
+    for (let i = 0; i < investors.length; i++) {
+      if (investors[i].minted) {
+        result.push(investors[i])
+      }
+    }
+
+    return result
   }
 
   async setCappedSTO (
