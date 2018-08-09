@@ -63,6 +63,7 @@ export type NetworkParams = {|
 |}
 
 export type Artifact = {|
+  contractName: string,
   abi: Object,
   networks: Object,
 |}

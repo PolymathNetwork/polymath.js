@@ -64,15 +64,20 @@ export default class Contract {
     if (!Contract.isMainnet() && this._artifactTestnet) {
       this._artifact = this._artifactTestnet
     }
-    try {
-      const address = at || this._artifact.networks[Contract._params.id].address
-      if (this._contract && this.address === address) {
-        return
-      }
-      this.address = address
+    let address
+    try { // $FlowFixMe
+      address = JSON.parse(localStorage.getItem('polymath.js'))[this._artifact.contractName][Contract._params.id]
     } catch (e) {
-      throw new Error('Contract is not deployed to the network ' + Contract._params.id)
+      try {
+        address = at || this._artifact.networks[Contract._params.id].address
+      } catch (e) {
+        throw new Error('Contract is not deployed to the network ' + Contract._params.id)
+      }
     }
+    if (this._contract && this.address === address) {
+      return
+    }
+    this.address = address
     this._contract = this._newContract()
     this._contractWS = Contract._params.web3WS === Contract._params.web3 ? this._contract : this._newContract(true)
     // noinspection JSUnresolvedVariable

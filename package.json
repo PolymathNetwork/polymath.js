@@ -1,6 +1,6 @@
 {
   "name": "polymathjs",
-  "version": "1.5.9",
+  "version": "1.5.10",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/PolymathNetwork/polymath.js.git"
@@ -56,7 +56,7 @@
     "lint": "eslint --fix src",
     "typecheck": "flow",
     "precommit": "lint-staged && npm run typecheck",
-    "ganache-cli": "ganache-cli -i 15 --gasLimit 90000000",
+    "ganache-cli": "ganache-cli --gasLimit 90000000",
     "contracts": "cd node_modules/polymath-core && yarn && node node_modules/truffle/build/cli.bundled.js migrate --reset --all --network development",
     "tconsole": "cd node_modules/polymath-core && yarn && node node_modules/truffle/build/cli.bundled.js console",
     "build": "babel src --out-dir dist",
