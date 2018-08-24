@@ -7,7 +7,7 @@ import Contract from './Contract'
 import PolyToken from './PolyToken'
 import IPFS from '../IPFS'
 
-import type { SymbolDetails, Web3Event, Web3Receipt } from '../../types'
+import type { Address, SymbolDetails, Web3Event, Web3Receipt } from '../../types'
 
 const LOG_REGISTER_TICKER = 'LogRegisterTicker'
 
@@ -26,9 +26,9 @@ class TickerRegistry extends Contract {
     return PolyToken.removeDecimals(await this._methods.registrationFee().call())
   }
 
-  async _getRegisterTickerEvents (): Promise<Array<Web3Event>> {
+  async _getRegisterTickerEvents (_owner?: Address, _timestamp?: number): Promise<Array<Web3Event>> {
     return await this._contractWS.getPastEvents(LOG_REGISTER_TICKER, {
-      filter: { _owner: this.account },
+      filter: { ...(_owner ? { _owner } : {}), ...(_timestamp ? { _timestamp } : {}) },
       fromBlock: 0,
       toBlock: 'latest'
     })
@@ -41,14 +41,7 @@ class TickerRegistry extends Contract {
     }
 
     if (!txHash) {
-      // TODO @bshevchenko: _timestamp in LogRegisterTicker event of polymath-core@1.1.0 is not indexed, hence we...
-      // TODO @bshevchenko: ...can't filter by it. Fix this when it'll be indexed
-      const events = await this._getRegisterTickerEvents()
-      for (let event of events) {
-        if (event.returnValues._timestamp === timestamp) {
-          txHash = event.transactionHash
-        }
-      }
+      txHash = (await this._getRegisterTickerEvents(owner, timestamp))[0].transactionHash
     }
 
     timestamp = this._toDate(timestamp)
@@ -74,7 +67,7 @@ class TickerRegistry extends Contract {
    * @deprecated
    */
   async getMyTokens (): Promise<Array<SymbolDetails>> {
-    const events = await this._getRegisterTickerEvents()
+    const events = await this._getRegisterTickerEvents(this.account)
     const tokens = []
     const expiryLimit = await this.expiryLimit() * 1000
     for (let event of events) {

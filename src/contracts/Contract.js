@@ -132,7 +132,7 @@ export default class Contract {
   async _tx (method: Object, value?: BigNumber, gasLimit?: number): Promise<Web3Receipt> {
     const preParams = {
       from: this.account,
-      value: value ? this._toWei(value) : undefined
+      value: value ? this._toWei((new BigNumber(value)).round(18).toString(10)) : undefined
     }
     let gas
     if (gasLimit && gasLimit > 10) {

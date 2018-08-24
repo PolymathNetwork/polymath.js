@@ -78,11 +78,13 @@ export default class STO extends Contract {
   }
 
   async buy (value: BigNumber): Promise<Web3Receipt> {
-    if (this.isPolyFundraise()) {
+    if (await this.isPolyFundraise()) {
+      const allowance = await PolyToken.allowance(this.account, this.address)
+      if (allowance.lt(value)) {
+        await PolyToken.approve(this.address, value)
+      }
       return this._tx(
-        this._methods.buyTokensWithPoly(
-          PolyToken.addDecimals(value)
-        ),
+        this._methods.buyTokensWithPoly(PolyToken.addDecimals(value)),
       )
     }
     return this._tx(
