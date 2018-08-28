@@ -1,6 +1,6 @@
 {
   "name": "polymathjs",
-  "version": "1.5.11",
+  "version": "1.6.0",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/PolymathNetwork/polymath.js.git"
@@ -43,7 +43,7 @@
   "dependencies": {
     "bignumber.js": "5.0.0",
     "bs58": "^4.0.1",
-    "polymath-core": "1.3.3",
+    "polymath-core": "1.4.0",
     "redux": "3.7.2",
     "redux-thunk": "2.2.0",
     "web3": "1.0.0-beta.30",

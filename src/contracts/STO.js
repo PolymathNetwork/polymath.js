@@ -15,7 +15,6 @@ export const FUNDRAISE_POLY = 1
 export default class STO extends Contract {
 
   wallet: () => Promise<Address>
-  fundraiseType: () => Promise<number>
   capReached: () => Promise<boolean>
   paused: () => Promise<boolean>
 
@@ -34,8 +33,20 @@ export default class STO extends Contract {
     )
   }
 
+  async checkFundraise (type: number): Promise<boolean> {
+    try { // $FlowFixMe
+      return (await this.fundRaiseType(type))
+    } catch (e) { // $FlowFixMe
+      return Number(await this.fundraiseType()) === type
+    }
+  }
+
   async isPolyFundraise (): Promise<boolean> {
-    return Number(await this.fundraiseType()) === FUNDRAISE_POLY
+    return this.checkFundraise(FUNDRAISE_POLY)
+  }
+
+  async isEthFundraise (): Promise<boolean> {
+    return this.checkFundraise(FUNDRAISE_ETH)
   }
 
   async getDetails (): Promise<STODetails> {
